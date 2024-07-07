@@ -1,5 +1,9 @@
 
+
+
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import '../../utils/constants.dart';
 import '../../utils/shared_prefs.dart';
@@ -69,7 +73,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
     state = state.copyWith(token: token);
   }
 
-  Future<void> login() async {
+  Future<void> login(BuildContext context) async {
     setLoading(true);
     setError(null);
 
@@ -104,11 +108,13 @@ print(apiUrl);
             showToast('Login Successful');
           final token = data['data']['token'];
           await SharedPrefs.saveToken(token);
+
           // await SharedPrefs.getTokenTimestamp();
           // final prefs = await SharedPreferences.getInstance();
           // await prefs.setString('authToken', token);
           setToken(token);
           state = state.copyWith(isLogin: true);
+          context.go('/home');
         } else {
           print('Token Not Found');
     

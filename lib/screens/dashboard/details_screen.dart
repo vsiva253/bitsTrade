@@ -1,7 +1,8 @@
+import 'dart:ffi';
+
 import 'package:bits_trade/data/modals/child_data_modal.dart';
 import 'package:bits_trade/data/modals/parent_data_modal.dart';
 import 'package:bits_trade/data/providers/dashboard_provider.dart';
-import 'package:bits_trade/screens/dashboard/dashboard_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +11,7 @@ class DetailsScreen extends ConsumerStatefulWidget {
   final ChildData? childData;
   final Data? parentData;
 
-  const DetailsScreen({Key? key, this.childData, this.parentData}) : super(key: key);
+  const DetailsScreen({super.key, this.childData, this.parentData});
 
   @override
   _DetailsScreenState createState() => _DetailsScreenState();
@@ -27,7 +28,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
 
-            Container(
+            SizedBox(
               width: 130,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -45,15 +46,15 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                     });
                   Navigator.pop(context);
                 },
-                child:loading? Text('Wait..'): Text('Delete'),
+                child:loading? const Text('Wait..'): const Text('Delete'),
               ),
             ),
-            Container(
+            SizedBox(
               width: 130,
               child: ElevatedButton(onPressed: () {
 
                   Navigator.pop(context);
-              }, child: Text('Close')),
+              }, child: const Text('Close')),
             ),
           ],
         ),
@@ -95,9 +96,9 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                     Column(
                       children: [
                         textWidget(context, 'Broker', '${widget.childData?.broker}', '${widget.parentData?.broker}'),
-                        textWidget(context, 'Broker Id', 'siva sai reddy', '${widget.parentData?.broker}'),
-                        textWidget(context, 'Login', 'Connected', '${widget.parentData?.broker}'),
-                        textWidget(context, 'Status', 'Active', '${widget.parentData?.broker}'),
+                        textWidget(context, 'Broker Id', '${widget.childData?.userId}', '${widget.parentData?.userId}'),
+                        textWidget(context, 'Login', '${widget.childData?.loginStatus}', '${widget.parentData?.loginStatus}'),
+                        textWidget(context, 'Status', widget.childData?.status ==true ? 'Active':'In Active', '${widget.parentData?.broker},',),
                       ],
                     ),
                   ),
@@ -124,11 +125,11 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                 'Orders',
                 style: Theme.of(context).textTheme.displayMedium!.copyWith(color: Theme.of(context).primaryColor),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 15,
               ),
               const OrderSummaryCard(),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -136,7 +137,8 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
     );
   }
 
-  Widget textWidget(BuildContext context, String type, String child, String parent) {
+  Widget textWidget(BuildContext context, String type, String child, String parent, {bool optionalBool =true}) {
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -148,14 +150,17 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
               color: Theme.of(context).colorScheme.onSurface,
               fontSize: 12,
               fontWeight: FontWeight.normal,
+     
             ),
           ),
           const Spacer(),
           Text(
             widget.childData != null ? child : parent,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
+              color:optionalBool? Theme.of(context).colorScheme.onSurface : Colors.red,
               fontWeight: FontWeight.w700,
+
+              
               fontSize: 12,
             ),
           ),

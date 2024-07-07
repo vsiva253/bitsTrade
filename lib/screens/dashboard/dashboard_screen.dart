@@ -1,5 +1,3 @@
-import 'package:bits_trade/data/modals/child_data_modal.dart';
-import 'package:bits_trade/data/modals/parent_data_modal.dart';
 import 'package:bits_trade/screens/dashboard/child_data_table.dart';
 
 import 'package:flutter/material.dart';
@@ -45,16 +43,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         children: [
           const SizedBox(height: 20),
           if (dashboardState.parentData == null)
-          ...List.generate(2, (index) => ParentDataShimmer())
+          ...List.generate(2, (index) => const ParentDataShimmer())
             // ParentDataShimmer()
-          else if (dashboardState.parentData?.data?.nameTag != null)
+          else if (dashboardState.parentData?.data?.id != null)
             ParentDataTable(parentData: dashboardState.parentData!.data!)
           else
             _buildAddParentContainer(context),
           const SizedBox(height: 50),
           if (dashboardState.parentData == null)
-            ...List.generate(4, (_) => ChildDataShimmer())
-          else if (dashboardState.parentData?.data?.nameTag != null)
+            ...List.generate(4, (_) => const ChildDataShimmer())
+          else if (dashboardState.parentData?.data?.id != null)
             dashboardState.childData?.isNotEmpty == true
               ? ChildDataTable(childData: dashboardState.childData!)
               : _buildAddChildContainer(context)
@@ -117,7 +115,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ),
       context: context,
       builder: (context) {
-        return Container(
+        return SizedBox(
                  height: MediaQuery.of(context).size.height * 0.95,
           child: SingleChildScrollView(
             child: Padding(
@@ -140,7 +138,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       
       context: context,
       builder: (context) {
-        return Container(
+        return SizedBox(
           height: MediaQuery.of(context).size.height * 0.95,
           child: SingleChildScrollView(
             child: Padding(
@@ -155,52 +153,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 }
 
-class DashboardState extends StateNotifier<DashboardData> {
-  final ParentApiService parentApiService;
-  final ChildApiService childApiService;
-
-  DashboardState(this.parentApiService, this.childApiService)
-      : super(DashboardData());
-
-  Future<void> loadParentData() async {
-    final parentData = await parentApiService.getParents();
-    state = state.copyWith(parentData: parentData);
-  }
-
-  Future<void> loadChildData() async {
-    final childData = await childApiService.getChilds();
-    state = state.copyWith(childData: childData);
-  }
-}
-
-class DashboardData {
-  final ParentData? parentData;
-  final List<ChildData>? childData;
-
-  DashboardData({this.parentData, this.childData});
-
-  DashboardData copyWith({
-    ParentData? parentData,
-    List<ChildData>? childData,
-  }) {
-    return DashboardData(
-      parentData: parentData ?? this.parentData,
-      childData: childData ?? this.childData,
-    );
-  }
-}
-
-final dashboardProvider = StateNotifierProvider<DashboardState, DashboardData>(
-  (ref) {
-    final parentApiService = ref.watch(parentApiServiceProvider);
-    final childApiService = ref.watch(childApiServiceProvider);
-    return DashboardState(parentApiService, childApiService);
-  },
-);
-
-
-
 class ParentDataShimmer extends StatelessWidget {
+  const ParentDataShimmer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
@@ -237,6 +192,8 @@ class ParentDataShimmer extends StatelessWidget {
 }
 
 class ChildDataShimmer extends StatelessWidget {
+  const ChildDataShimmer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(

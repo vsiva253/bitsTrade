@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bits_trade/screens/bottombar.dart';
 import 'package:bits_trade/screens/login/login_page.dart';
+import 'package:bits_trade/screens/login/login_provider.dart';
 import 'package:bits_trade/screens/login/start_screen.dart';
 import 'package:bits_trade/screens/profile/profile_screen.dart';
 import 'package:bits_trade/screens/sign_up/sign_up_screen.dart';
@@ -12,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,28 +51,37 @@ class _MyAppState extends ConsumerState<MyApp> {
         ),
         GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
         GoRoute(path: '/register', builder: (context, state) => const RegisterScreen()),
-       
+        GoRoute(path: '/loginCallback', builder: (context, state) =>const LoginScreen()),
+       GoRoute(path: '/profile', builder: (context, state) => const SettingsScreen()),
 
 
       ],
       redirect: (context, state) {
-        if (_isLoggedIn == null) {
-          return '/';
+    
+   
+      
+           final token = ref.watch(loginProvider).token;
+        
+        if (token != null ||_isLoggedIn == true) {
+
+          return '/home'; // Redirect to home if token is present
+        } else if (state.uri.toString() == '/startScreen') {
+          return '/startScreen'; // Stay on start screen if no token
         }
-        if (_isLoggedIn! && state.uri.toString() == '/startScreen') {
+        if(state.fullPath == '/loginCallback') {
+
+        print('Redirecting to /home');
+          
           return '/home';
         }
-        if (!_isLoggedIn! && state.uri.toString() == '/home') {
-          return '/startScreen';
-        }
+
         return null;
       },
     );
   }
 
   Future<void> _checkLoginStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('authToken');
+  final token = await SharedPrefs.getToken();
     setState(() {
       _isLoggedIn = token != null;
     });
@@ -118,7 +127,7 @@ Future<void> checkAndScheduleTokenClear() async {
 }
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -128,8 +137,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+  
     Timer(const Duration(seconds: 3), () {
-      context.go('/startScreen'); // Navigate to the login screen after 3 seconds
+      context.go('/startScreen'); 
     });
   }
 

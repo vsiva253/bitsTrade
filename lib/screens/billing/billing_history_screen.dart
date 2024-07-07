@@ -1,4 +1,6 @@
 import 'package:bits_trade/screens/dashboard/dashboard_screen.dart';
+import 'package:bits_trade/screens/subscription/subscription_checkout_provider.dart';
+import 'package:bits_trade/utils/shared_prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart'; // Add this import statement
@@ -7,7 +9,7 @@ import '../../data/modals/subscription_history_modal.dart';
 import '../../data/providers/subscription_provider.dart';
 
 class SubscriptionHistoryScreen extends ConsumerStatefulWidget {
-  const SubscriptionHistoryScreen({Key? key}) : super(key: key);
+  const SubscriptionHistoryScreen({super.key});
 
   @override
   _SubscriptionHistoryScreenState createState() =>
@@ -17,6 +19,7 @@ class SubscriptionHistoryScreen extends ConsumerStatefulWidget {
 class _SubscriptionHistoryScreenState
     extends ConsumerState<SubscriptionHistoryScreen> {
 
+
     
   @override
   void initState() {
@@ -25,12 +28,13 @@ class _SubscriptionHistoryScreenState
     // ref.refresh(subscriptionHistoryProvider);
 
 
-
+print(SharedPrefs.getToken());
 
     // ref.watch(subscriptionHistoryProvider);
 
     super.initState();
   }
+   
 
   @override
   Widget build(
@@ -38,14 +42,32 @@ class _SubscriptionHistoryScreenState
   ) {
   
     final subscriptionHistory = ref.watch(subscriptionHistoryProvider);
+    ref.watch(paymentStatusProvider);
+    ref.listen(paymentStatusProvider, (previous, next) {
+      if (next == PaymentStatus.error) {
+       ref.refresh(subscriptionHistoryProvider);
+       setState(() {
+         
+       });
+      }
+    });
+
+
+
+
+
+
+ 
 
     return Scaffold(
       body: subscriptionHistory.when(
         data: (history) => history!.data == null || history.data!.isEmpty
-            ? ParentDataShimmer()
+            ?const Center(
+              child: Text('Something Went Wrong'),
+            )
             : Column(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   Expanded(
@@ -64,12 +86,11 @@ class _SubscriptionHistoryScreenState
                   ),
                 ],
               ),
-        error: (error, stackTrace) => Center(
+        error: (error, stackTrace) => const Center(
           child: Text('No subscription history found.'),
         ),
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const ParentDataShimmer(),
+        
       ),
     );
   }
@@ -80,8 +101,7 @@ class SubscriptionHistoryItem extends StatelessWidget {
   final bool isEven;
 
   const SubscriptionHistoryItem(
-      {Key? key, required this.subscription, required this.isEven})
-      : super(key: key);
+      {super.key, required this.subscription, required this.isEven});
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +168,7 @@ class SubscriptionHistoryItem extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Color(0xFF7C7E8C),
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -157,7 +177,7 @@ class SubscriptionHistoryItem extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             color: Color(0xFF44475B),
             fontSize: 16,
           ),

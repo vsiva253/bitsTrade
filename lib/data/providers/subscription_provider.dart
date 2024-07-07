@@ -34,6 +34,7 @@ final apiEndpoint = Uri.parse('${Constants.apiBaseUrl}/api/v1/subscription/histo
 
 // Create a Riverpod provider for fetching subscription history
 final subscriptionHistoryProvider = FutureProvider<SubscriptionHistory?>((ref) async {
+  print('fetching subscription history');
   var token = await SharedPrefs.getToken();
   // Fetch subscription history data using the provided API token
   final response = await http.get(

@@ -1,4 +1,3 @@
-
 // To parse this JSON data, do
 //
 //     final parentData = parentDataFromJson(jsonString);
@@ -43,6 +42,10 @@ class Data {
   String? apiSecret;
   String? nameTag;
   bool? withApi;
+  bool? loginStatus;
+  String? redirectUrl;
+  String? pin;
+  String? mobile; // Add the 'mobile' field
 
   Data({
     this.id,
@@ -53,7 +56,11 @@ class Data {
     this.apiKey,
     this.apiSecret,
     this.nameTag,
-    this.withApi
+    this.withApi,
+    this.loginStatus,
+    this.redirectUrl,
+    this.pin,
+    this.mobile,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
@@ -65,7 +72,11 @@ class Data {
         apiKey: json["api_key"],
         apiSecret: json["api_secret"],
         nameTag: json["name_tag"],
-        withApi: json["with_api"]
+        withApi: json["with_api"],
+        loginStatus: json["login_status"], // Deserialize 'login_status'
+        redirectUrl: json["redirect_url"], // Deserialize 'redirect_url'
+        pin: json["pin"], // Deserialize 'pin'
+        mobile: json["mobile"], // Deserialize 'mobile'
       );
 
   Map<String, dynamic> toJson() => {
@@ -77,7 +88,11 @@ class Data {
         "api_key": apiKey,
         "api_secret": apiSecret,
         "name_tag": nameTag,
-        "with_api": withApi
+        "with_api": withApi,
+        "login_status": loginStatus, // Serialize 'login_status'
+        "redirect_url": redirectUrl, // Serialize 'redirect_url'
+        "pin": pin, // Serialize 'pin'
+        "mobile": mobile, // Serialize 'mobile'
       };
 }
 

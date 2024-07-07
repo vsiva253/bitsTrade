@@ -1,15 +1,17 @@
 import 'package:bits_trade/screens/dashboard/details_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/modals/child_data_modal.dart';
+import '../../data/providers/dashboard_provider.dart';
 import 'add_child_form.dart';
 
-class ChildDataTable extends StatelessWidget {
+class ChildDataTable extends ConsumerWidget {
   final List<ChildData> childData;
 
   const ChildDataTable({super.key, required this.childData});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,ref) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Column(
@@ -35,7 +37,7 @@ class ChildDataTable extends StatelessWidget {
                 context: context,
                 builder: (context) {
                   return Container(
-                    height: MediaQuery.of(context).size.height * 0.8,
+                    height: MediaQuery.of(context).size.height * 0.95,
                     padding: EdgeInsets.only(
                         bottom: MediaQuery.of(context).viewInsets.bottom),
                     child: const SingleChildScrollView(
@@ -75,7 +77,7 @@ class ChildDataTable extends StatelessWidget {
             columns: const [
               DataColumn(label: Text('S.no')),
               DataColumn(label: Text('Name')),
-              DataColumn(label: Text('Login')),
+              DataColumn(label: Text('  Login')),
               DataColumn(label: Text('Status')),
               DataColumn(label: Text('Multiplier')),
               DataColumn(label: Text('Play/Pause')),
@@ -85,7 +87,7 @@ class ChildDataTable extends StatelessWidget {
                 .map((child) => DataRow(
                       color: MaterialStateProperty.all(
                           Theme.of(context).colorScheme.tertiary),
-                      cells: _buildCells(context, child),
+                      cells: _buildCells(context, child, ref),
                     ))
                 .toList(),
           ),
@@ -94,22 +96,49 @@ class ChildDataTable extends StatelessWidget {
     );
   }
 
-  List<DataCell> _buildCells(BuildContext context, ChildData child) {
+  List<DataCell> _buildCells(BuildContext context, ChildData child , ref) {
     return [
       DataCell(Text(childData.indexOf(child).toString())),
       DataCell(Text(child.broker ?? ''), onTap: () {
         _navigateToDetailsScreen(context, child);
       }),
-      DataCell(const Text('Connected'), onTap: () {
-        _navigateToDetailsScreen(context, child);
-      }),
-      DataCell(const Text('Active'), onTap: () {
+      DataCell(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          
+          children: [
+            Transform.scale(
+              scale: 0.8,
+              child: Switch(
+                value: child.loginStatus ?? false,
+                onChanged: (bool value) {
+                  ref.read(dashboardProvider.notifier).updateChildConnection(
+                      child.id!, ); // Update connection status
+                },
+                activeColor: Colors.white,
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: Colors.red,
+                activeTrackColor: Theme.of(context).primaryColor,
+                trackOutlineColor:  MaterialStateColor.resolveWith((states) => Colors.white),
+                splashRadius: BorderSide.strokeAlignCenter,
+              ),
+            ),
+            Spacer()
+          ],
+        ),
+        onTap: () {
+          _navigateToDetailsScreen(context, child); // Open DetailsScreen
+        },
+      ),
+      DataCell(child.status == true? Text('Active',style: TextStyle(color: Theme.of(context).primaryColor),):const Text('In Active',style: TextStyle(color: Colors.red),), onTap: () {
         _navigateToDetailsScreen(context, child);
       }),
       DataCell(Text(child.multiplier ?? ''), onTap: () {
         _navigateToDetailsScreen(context, child);
       }),
-      DataCell(const Text('Play/Pause'), onTap: () {
+      DataCell(child.status ==false? IconButton(onPressed: (){}, icon: Icon(Icons.play_arrow_outlined,color: Colors.teal,)): IconButton(onPressed: (){
+
+      }, icon: Icon(Icons.pause_outlined,color: Colors.teal,)), onTap: () {
         _navigateToDetailsScreen(context, child);
       }),
       DataCell(
@@ -135,7 +164,7 @@ class ChildDataTable extends StatelessWidget {
       context: context,
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.9,
+          height: MediaQuery.of(context).size.height * 0.95,
           padding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: DetailsScreen(childData: child),
@@ -151,7 +180,7 @@ class ChildDataTable extends StatelessWidget {
       context: context,
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.8,
+          height: MediaQuery.of(context).size.height * 0.95,
           padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom),
           child: SingleChildScrollView(

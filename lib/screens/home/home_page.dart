@@ -86,11 +86,11 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       ),
             
                           ),
-                           SizedBox(height: 10),
+                           const SizedBox(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Icon(Icons.arrow_drop_up,
+                              const Icon(Icons.arrow_drop_up,
                                   color: Color(0xFF00B386),),
                               Text(
                                 '+50,18%',
@@ -99,7 +99,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                                     .bodyLarge!
                                     .copyWith(
                                         color:
-                                            Color(0xFF00B386),)
+                                            const Color(0xFF00B386),)
                               ),
                             ],
                           ),

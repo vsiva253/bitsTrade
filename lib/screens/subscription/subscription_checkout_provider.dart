@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../../data/providers/subscription_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
 
 
 
@@ -38,6 +40,8 @@ state = PaymentStatus.loading;
     showToast('Payment successful');
     state = PaymentStatus.success;
     state = PaymentStatus.initial;
+
+
 
 
     

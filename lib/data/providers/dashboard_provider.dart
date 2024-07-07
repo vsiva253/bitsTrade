@@ -34,6 +34,8 @@ class ParentApiService {
         },
         body: json.encode(parent),
       );
+      print(parent);
+      print(token);
 
       // Handle the response
       switch (response.statusCode) {
@@ -73,7 +75,11 @@ class ParentApiService {
           '${Constants.apiBaseUrl}/api/v1/parent/getParents';
 
       // Make the GET request
+
+
       final response = await http.get(
+
+
         Uri.parse(endpoint),
         headers: {
           'accept': 'application/json',
@@ -81,8 +87,13 @@ class ParentApiService {
         },
       );
 
+print(response.body);
+  
+
       // Handle the response
       switch (response.statusCode) {
+  
+
         case 200:
           // Successful response
           final Map<String, dynamic> jsonData = jsonDecode(response.body);
@@ -189,6 +200,51 @@ class ParentApiService {
       showToast('Something went wrong');
     }
   }
+  // Add a method to update parent login status
+  Future<void> updateParentLoginStatus(
+      String parentId,) async {
+    var token = await SharedPrefs.getToken();
+
+    try {
+      // Define the API endpoint
+      final String endpoint =
+          '${Constants.apiBaseUrl}/api/v1/parent/login?parentId=$parentId';
+
+      // Make the PUT request
+      final response = await _client.post(
+        Uri.parse(endpoint),
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+       
+      );
+print(response.body);
+      // Handle the response
+      switch (response.statusCode) {
+        case 200:
+
+
+        print('login status response ${response.body}');
+          // Successful response
+          // Update the state in the dashboard provider
+          showToast('Parent login status updated successfully');
+          break;
+        case 401:
+          // Unauthorized
+          showToast('Unauthorized');
+          break;
+        default:
+          // Other errors
+          showToast('An error occurred');
+      }
+    } catch (e) {
+      // Handle any network errors
+      showToast('Something went wrong');
+    }
+  }
+  
 }
 
 
@@ -215,7 +271,7 @@ class ChildApiService {
           data: childData,
           options: Options(headers: headers));
       // Handle success response (if needed)
-      print(response.data);
+print('childData bp------ $childData');
       if (response.statusCode == 200) {
         showToast('Child added successfully');
       } else if (response.statusCode == 422) {
@@ -372,5 +428,117 @@ class ChildApiService {
       print(error);
     }
   }
+  Future<void> updateChildLoginStatus(String childId)async{
+
+      var token = await SharedPrefs.getToken();
+
+    try {
+      // Define the API endpoint
+      final String endpoint =
+          '${Constants.apiBaseUrl}/api/v1/child/login?childId=$childId';
+
+      // Make the PUT request
+      final response = await http.post(
+        Uri.parse(endpoint),
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+       
+      );
+print(response.body);
+print(childId);
+      // Handle the response
+      switch (response.statusCode) {
+        case 200:
+
+
+        print('login status response ${response.body}');
+          // Successful response
+          // Update the state in the dashboard provider
+          showToast('Child login status updated successfully');
+          break;
+        case 401:
+          // Unauthorized
+          showToast('Unauthorized');
+          break;
+        default:
+          // Other errors
+          showToast('An error occurred');
+      }
+    } catch (e) {
+      // Handle any network errors
+      showToast('Something went wrong');
+    }
+  
+  
+  }
 }
+
+class DashboardState extends StateNotifier<DashboardData> {
+  final ParentApiService parentApiService;
+  final ChildApiService childApiService;
+
+  DashboardState(this.parentApiService, this.childApiService)
+      : super(DashboardData());
+
+  Future<void> loadParentData() async {
+    final parentData = await parentApiService.getParents();
+    print(parentData);
+    state = state.copyWith(parentData: parentData);
+  }
+
+  Future<void> loadChildData() async {
+    final childData = await childApiService.getChilds();
+    state = state.copyWith(childData: childData);
+  }
+
+  Future<void> updateParentConnection(String parentId,) async {
+    try {
+      await parentApiService.updateParentLoginStatus(parentId);
+      // Refresh parent data to update the connection status in the UI
+      await loadParentData();
+    } catch (e) {
+      print('Error updating parent connection: ${e.toString()}');
+    }
+  }
+
+  Future<void> updateChildConnection(String childId)async{
+    try{
+      await childApiService.updateChildLoginStatus(childId);
+      await loadChildData();
+    }catch (e){
+
+        print('Error updating child connection: ${e.toString()}');
+    }
+
+
+  }
+}
+
+class DashboardData {
+  final ParentData? parentData;
+  final List<ChildData>? childData;
+
+  DashboardData({this.parentData, this.childData});
+
+  DashboardData copyWith({
+    ParentData? parentData,
+    List<ChildData>? childData,
+  }) {
+    return DashboardData(
+      parentData: parentData ?? this.parentData,
+      childData: childData ?? this.childData,
+    );
+  }
+}
+
+final dashboardProvider = StateNotifierProvider<DashboardState, DashboardData>(
+  (ref) {
+    final parentApiService = ref.watch(parentApiServiceProvider);
+    final childApiService = ref.watch(childApiServiceProvider);
+    return DashboardState(parentApiService, childApiService);
+  },
+);
 

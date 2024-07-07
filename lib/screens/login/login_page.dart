@@ -1,9 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/loading_button_widget.dart';
 import 'login_provider.dart'; // Ensure this path is correct
+//import google sign in 
+import 'package:google_sign_in/google_sign_in.dart';
 
 
 class LoginScreen extends ConsumerWidget {
@@ -11,6 +12,7 @@ class LoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
     final loginState = ref.watch(loginProvider);
     final loginNotifier = ref.read(loginProvider.notifier);
 
@@ -71,7 +73,7 @@ class LoginScreen extends ConsumerWidget {
               LoadingButton(
                 isLoading: loginState.isLoading,
                 onPressed: () async {
-                  await loginNotifier.login();
+                  await loginNotifier.login(context);
                 },
                 text: 'Login',
               ),
@@ -113,28 +115,44 @@ class LoginScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-//  ElevatedButton(
-//               onPressed: () async {
-//                 final accessToken = await GoogleSignIn(
-//                   context,
-//                   clientId: '948702023927-u4bvpjr4ser10ikinvi7qcsmofg869e9.apps.googleusercontent.com', // Replace with your actual client ID
-//                   clientSecret: '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', // Replace with your actual client secret
-//                   redirectUri: 'https://dev.bitstrade.in/', // Replace with your custom redirect URI
-//                 ).signIn();
-
-//                 if (accessToken != null) {
-//                   print('Access token: $accessToken'); 
-//                 } else {
-//                   print('Sign-in failed.');
-//                 }
-//               },
-//               child: Text('Sign in with Google'),
-//             ),
-              
+              const SizedBox(height: 30),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     await _handleSignIn(context); // Trigger Google Sign In
+              //   },
+              //   child: const Text('Google Sign In'),
+              // ),
             ],
           ),
         ),
       ),
     );
+  }
+  Future<void> _handleSignIn(BuildContext context) async {
+    final googleSignIn = GoogleSignIn(
+      serverClientId: '948702023927-ggahn8ctcqohh5qcateeo2c5a5j52cjo.apps.googleusercontent.com', // Replace with your Client ID
+    );
+
+    try {
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser != null) {
+        // Handle the Google Sign In success
+        final googleAuth = await googleUser.authentication;
+        final idToken = googleAuth.idToken;
+
+        // Now you have the idToken, you can send it to your backend for user authentication and authorization
+        // ...
+        print('ID Token: $idToken');
+
+        // You can also access user details
+        final user = googleUser;
+        print('User Name: ${user.displayName}');
+        print('User Email: ${user.email}');
+        print('User Photo: ${user.photoUrl}');
+      }
+    } catch (error) {
+      print('Error during Google Sign In: $error');
+      // Handle the error appropriately, show an error message, etc.
+    }
   }
 }

@@ -53,6 +53,10 @@ userProfile =await ref.watch(profileProvider);
     if (_selectedIndex==2){
      
         ref.read(subscriptionHistoryProvider);
+     
+  
+
+    
     }
     setState(() {
       _selectedIndex = index;
@@ -174,7 +178,7 @@ userProfile =await ref.watch(profileProvider);
           onPressed: () {
             // Handle notification icon press
           },
-          icon: Icon(
+          icon: const Icon(
             Icons.notifications_outlined,
             size: 30,
             color: Color(0xFF00B386),

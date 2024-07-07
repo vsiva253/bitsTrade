@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../login/login_page.dart';
 import 'register_state_modal.dart';
 import 'sign_up_provider.dart';
@@ -175,11 +176,7 @@ const SizedBox(height: 20,),
                     onPressed: registerState.isLoading
                         ? null
                         : () {
-                            Navigator.pushReplacement(
-                              context,
-                              CupertinoPageRoute(
-                                  builder: (context) => const LoginScreen()),
-                            );
+                          context.go('/login');
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,

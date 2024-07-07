@@ -71,8 +71,8 @@ class ShimmerWidget extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Shimmer.fromColors(
-            highlightColor:Color(0xFFECFFFA).withOpacity(0.5),
-          baseColor  : Color(0xFFCCFFF2).withOpacity(0.5),
+            highlightColor:const Color(0xFFECFFFA).withOpacity(0.5),
+          baseColor  : const Color(0xFFCCFFF2).withOpacity(0.5),
             child: Container(
               height: 100,
               width: double.infinity,

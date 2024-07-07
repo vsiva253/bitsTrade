@@ -103,6 +103,8 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
           'password': state.password,
         }),
       );
+      print(response.body);
+      print(response.statusCode);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
