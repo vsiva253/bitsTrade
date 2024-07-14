@@ -8,6 +8,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../utils/constants.dart';
+
 
 
 
@@ -23,7 +25,7 @@ class PaymentStatusNotifier extends StateNotifier<PaymentStatus> {
   Future<void> startPayment(Map<String, dynamic> checkoutDetails) async {
    
 
-  final apiEndpoint = Uri.parse('https://dev.bitstrade.in/api/v1/subscription/add');
+  final apiEndpoint = Uri.parse('${Constants.apiBaseUrl}/api/v1/subscription/add');
 // Replace with your actual API key
 
   // Sample data for the request body 

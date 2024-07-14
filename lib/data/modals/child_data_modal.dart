@@ -14,6 +14,7 @@ class ChildData {
   final String? nameTag;
   final bool? withApi;
     String? redirectUrl;
+   
   String? pin;
   String? mobile; // Add the 'mobile' field
 

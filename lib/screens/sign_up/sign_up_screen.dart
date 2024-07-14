@@ -146,6 +146,7 @@ class RegisterScreen extends ConsumerWidget {
                     isLoading: registerState.isLoading,
                     onPressed: () async {
                       await registerNotifier.register();
+                      context.go('/login');
                     },
                     text: 'Register',
                   ),
@@ -175,8 +176,8 @@ const SizedBox(height: 20,),
                   child: ElevatedButton(
                     onPressed: registerState.isLoading
                         ? null
-                        : () {
-                          context.go('/login');
+                        : () async{
+           Navigator.push(context, CupertinoPageRoute(builder: (context) => const LoginScreen()));
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,

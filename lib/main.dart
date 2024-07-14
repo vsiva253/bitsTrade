@@ -89,10 +89,10 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ));
+    // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    //   statusBarColor: Colors.pink,
+    //   statusBarIconBrightness: Brightness.dark,
+    // ));
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,

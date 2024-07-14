@@ -1,3 +1,5 @@
+import 'package:bits_trade/data/modals/get_funds_model.dart';
+import 'package:bits_trade/data/modals/parent_positions_model.dart';
 import 'package:bits_trade/screens/dashboard/details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,13 +7,15 @@ import '../../data/modals/child_data_modal.dart';
 import '../../data/providers/dashboard_provider.dart';
 import 'add_child_form.dart';
 
+final loadingProvider = StateProvider<bool>((ref) => false);
+
 class ChildDataTable extends ConsumerWidget {
   final List<ChildData> childData;
 
   const ChildDataTable({super.key, required this.childData});
 
   @override
-  Widget build(BuildContext context,ref) {
+  Widget build(BuildContext context, ref) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Column(
@@ -31,8 +35,8 @@ class ChildDataTable extends ConsumerWidget {
             ),
             onPressed: () {
               showModalBottomSheet(
-                shape:
-                    const ContinuousRectangleBorder(borderRadius: BorderRadius.zero),
+                shape: const ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.zero),
                 isScrollControlled: true,
                 context: context,
                 builder: (context) {
@@ -77,11 +81,11 @@ class ChildDataTable extends ConsumerWidget {
             columns: const [
               DataColumn(label: Text('S.no')),
               DataColumn(label: Text('Name')),
-              DataColumn(label: Text('  Login')),
+              DataColumn(label: Text(' Login')),
               DataColumn(label: Text('Status')),
               DataColumn(label: Text('Multiplier')),
-              DataColumn(label: Text('Play/Pause')),
-              DataColumn(label: Text('Actions')), // Added Actions column
+              // DataColumn(label: Text('Play/Pause')),
+              DataColumn(label: Text(' Actions')), // Added Actions column
             ],
             rows: childData
                 .map((child) => DataRow(
@@ -96,30 +100,35 @@ class ChildDataTable extends ConsumerWidget {
     );
   }
 
-  List<DataCell> _buildCells(BuildContext context, ChildData child , ref) {
+  List<DataCell> _buildCells(BuildContext context, ChildData child, ref) {
     return [
       DataCell(Text(childData.indexOf(child).toString())),
       DataCell(Text(child.broker ?? ''), onTap: () {
-        _navigateToDetailsScreen(context, child);
+        _navigateToDetailsScreen(context, child, ref);
       }),
       DataCell(
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
-          
           children: [
             Transform.scale(
               scale: 0.8,
               child: Switch(
                 value: child.loginStatus ?? false,
                 onChanged: (bool value) {
-                  ref.read(dashboardProvider.notifier).updateChildConnection(
-                      child.id!, ); // Update connection status
+                  value == true
+                      ? null
+                      : ref
+                          .read(dashboardProvider.notifier)
+                          .updateChildConnection(
+                            child.id!,
+                          ); // Update connection status
                 },
                 activeColor: Colors.white,
                 inactiveThumbColor: Colors.white,
                 inactiveTrackColor: Colors.red,
                 activeTrackColor: Theme.of(context).primaryColor,
-                trackOutlineColor:  MaterialStateColor.resolveWith((states) => Colors.white),
+                trackOutlineColor:
+                    MaterialStateColor.resolveWith((states) => Colors.white),
                 splashRadius: BorderSide.strokeAlignCenter,
               ),
             ),
@@ -127,37 +136,84 @@ class ChildDataTable extends ConsumerWidget {
           ],
         ),
         onTap: () {
-          _navigateToDetailsScreen(context, child); // Open DetailsScreen
+          _navigateToDetailsScreen(context, child, ref); // Open DetailsScreen
         },
       ),
-      DataCell(child.status == true? Text('Active',style: TextStyle(color: Theme.of(context).primaryColor),):const Text('In Active',style: TextStyle(color: Colors.red),), onTap: () {
-        _navigateToDetailsScreen(context, child);
+      DataCell(
+          child.status == true
+              ? Text(
+                  'Active',
+                  style: TextStyle(color: Theme.of(context).primaryColor),
+                )
+              : const Text(
+                  'In Active',
+                  style: TextStyle(color: Colors.red),
+                ), onTap: () {
+        _navigateToDetailsScreen(context, child, ref);
       }),
       DataCell(Text(child.multiplier ?? ''), onTap: () {
-        _navigateToDetailsScreen(context, child);
+        _navigateToDetailsScreen(context, child, ref);
       }),
-      DataCell(child.status ==false? IconButton(onPressed: (){}, icon: Icon(Icons.play_arrow_outlined,color: Colors.teal,)): IconButton(onPressed: (){
 
-      }, icon: Icon(Icons.pause_outlined,color: Colors.teal,)), onTap: () {
-        _navigateToDetailsScreen(context, child);
-      }),
       DataCell(
         Row(
           children: [
+            child.status == false
+                ? IconButton(
+                    onPressed: () async {
+                      await ref
+                          .read(dashboardProvider.notifier)
+                          .updateChildStatus(child.id!, true);
+                    },
+                    icon: Icon(
+                      Icons.play_arrow_outlined,
+                      color: Colors.teal,
+                    ))
+                : IconButton(
+                    onPressed: () async {
+                      await ref
+                          .read(dashboardProvider.notifier)
+                          .updateChildStatus(child.id!, false);
+                    },
+                    icon: Icon(
+                      Icons.pause_outlined,
+                      color: Colors.teal,
+                    )),
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
-                _showEditChildBottomSheet(context, child); // Show Edit Child form
+                _showEditChildBottomSheet(
+                    context, child); // Show Edit Child form
               },
             ),
-         
           ],
         ),
       ), // Actions column
     ];
   }
 
-  void _navigateToDetailsScreen(BuildContext context, ChildData child) {
+  void _navigateToDetailsScreen(
+      BuildContext context, ChildData child, WidgetRef ref) async {
+    ref.read(loadingProvider.notifier).state = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    GetFundsModel? fundsData =
+        await ref.read(childApiServiceProvider).getFunds(child.id!);
+    ParentPositionsModel? positionsData =
+        await ref.read(childApiServiceProvider).getPositions(child.id!);
+    Navigator.pop(context); // Remove loading dialog
+
+    ref.read(loadingProvider.notifier).state = false;
+
     showModalBottomSheet(
       shape: const ContinuousRectangleBorder(borderRadius: BorderRadius.zero),
       isScrollControlled: true,
@@ -167,7 +223,11 @@ class ChildDataTable extends ConsumerWidget {
           height: MediaQuery.of(context).size.height * 0.95,
           padding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: DetailsScreen(childData: child),
+          child: DetailsScreen(
+            fundsData,
+            positionsData,
+            childData: child,
+          ),
         );
       },
     );
@@ -181,8 +241,8 @@ class ChildDataTable extends ConsumerWidget {
       builder: (context) {
         return Container(
           height: MediaQuery.of(context).size.height * 0.95,
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: SingleChildScrollView(
             child: AddChildForm(
               child: child, // Pass the child data for editing
@@ -192,5 +252,5 @@ class ChildDataTable extends ConsumerWidget {
         );
       },
     );
-  }}
-
+  }
+}

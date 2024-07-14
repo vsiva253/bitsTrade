@@ -3,6 +3,7 @@
 //     final parentData = parentDataFromJson(jsonString);
 
 import 'dart:convert';
+import 'dart:ffi';
 
 ParentData parentDataFromJson(String str) => ParentData.fromJson(json.decode(str));
 
@@ -46,6 +47,9 @@ class Data {
   String? redirectUrl;
   String? pin;
   String? mobile; // Add the 'mobile' field
+  double? funds;
+  bool? socket;
+  
 
   Data({
     this.id,
@@ -61,6 +65,9 @@ class Data {
     this.redirectUrl,
     this.pin,
     this.mobile,
+    this.funds,
+    this.socket
+   
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
@@ -77,6 +84,10 @@ class Data {
         redirectUrl: json["redirect_url"], // Deserialize 'redirect_url'
         pin: json["pin"], // Deserialize 'pin'
         mobile: json["mobile"], // Deserialize 'mobile'
+        funds: json["funds"],
+        socket: json["socket"]
+
+      
       );
 
   Map<String, dynamic> toJson() => {
@@ -93,6 +104,9 @@ class Data {
         "redirect_url": redirectUrl, // Serialize 'redirect_url'
         "pin": pin, // Serialize 'pin'
         "mobile": mobile, // Serialize 'mobile'
+        "funds": funds,
+        "socket": socket
+
       };
 }
 

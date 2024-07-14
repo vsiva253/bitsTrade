@@ -1,9 +1,9 @@
-import 'package:bits_trade/data/providers/dashboard_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/modals/parent_data_modal.dart';
 import '../../data/modals/publicModals/unified_form_fields.dart';
+import '../../data/providers/dashboard_provider.dart';
 import '../../data/providers/public_api_provider.dart';
 
 enum BrokerType { zerodha, upstox }
@@ -21,51 +21,50 @@ class AddParentForm extends ConsumerStatefulWidget {
 class _AddParentFormState extends ConsumerState<AddParentForm> {
   final _formKey = GlobalKey<FormState>();
   BrokerType? selectedBrokerType;
-  bool _withApi = true;
   final Map<String, TextEditingController> _controllers = {};
+  bool _formFieldsLoaded = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Initially, fetch form fields for Zerodha (with API)
-    _loadFormFields(BrokerType.zerodha, true); 
-
-    // Set selectedBrokerType and _withApi based on widget.parent
+    // If editing, set the initial broker type and initialize controllers
     if (widget.parent != null) {
       selectedBrokerType = widget.parent!.broker == 'upstox'
           ? BrokerType.upstox
           : BrokerType.zerodha;
-      _withApi = widget.parent!.broker == 'zerodha' && widget.parent!.withApi!;
       _initializeControllers();
+    } else {
+      // Initially, fetch form fields for Zerodha
+      _loadFormFields(BrokerType.zerodha);
     }
   }
 
-  void _loadFormFields(BrokerType brokerType, bool withApi) {
-    // Function to load form fields based on brokerType and withApi
-    ref.read(formFieldsProvider(brokerType.name)).whenData((response) {
-      List<UnifiedFormField> fields;
-      if (brokerType == BrokerType.zerodha) {
-        final zerodhaResponse = response as ZerodhaFormFieldsResponse;
-        fields = withApi
-            ? zerodhaResponse.withApi.fields
-            : zerodhaResponse.withoutApi.fields;
-      } else {
-        fields = (response as FormFieldsResponse).fields;
-      }
+  Future<void> _loadFormFields(BrokerType brokerType) async {
+    // Function to load form fields based on brokerType
+    final response = await ref.read(formFieldsProvider(brokerType.name).future);
 
-      for (var field in fields) {
-        _controllers[field.id] = TextEditingController(
-          text: _getInitialValue(field.id) ?? field.initialValue,
-        );
-      }
-      setState(() {}); // Rebuild to reflect changes
+    List<UnifiedFormField> fields;
+    if (brokerType == BrokerType.zerodha) {
+      final zerodhaResponse = response as ZerodhaFormFieldsResponse;
+      fields = zerodhaResponse.withoutApi.fields; // Always use withoutApi for Zerodha
+    } else {
+      fields = (response as FormFieldsResponse).fields;
+    }
+
+    for (var field in fields) {
+      _controllers[field.id] = TextEditingController(
+        text: _getInitialValue(field.id) ?? field.initialValue,
+      );
+    }
+
+    setState(() {
+      _formFieldsLoaded = true; // Set the flag to true after loading fields
     });
   }
 
   String? _getInitialValue(String fieldId) {
-    // Only load initial values if selectedBrokerType is not null
-    if (selectedBrokerType != null) {
+    if (selectedBrokerType != null && widget.parent != null) {
       switch (fieldId) {
         case 'user_id':
           return widget.parent?.userId;
@@ -80,20 +79,19 @@ class _AddParentFormState extends ConsumerState<AddParentForm> {
         case 'name_tag':
           return widget.parent?.nameTag;
         case 'redirect_url':
-          return widget.parent?.redirectUrl; // Add for 'redirect_url'
+          return widget.parent?.redirectUrl;
         case 'pin':
-          return widget.parent?.pin; // Add for 'pin'
+          return widget.parent?.pin;
         case 'mobile':
-          return widget.parent?.mobile; // Add for 'mobile'
+          return widget.parent?.mobile;
         default:
           return null;
       }
     }
-    return null; // Return null if selectedBrokerType is null
+    return null;
   }
 
   void _initializeControllers() {
-    // Initialize controllers based on parent data (if available)
     if (widget.parent != null) {
       _controllers['user_id'] = TextEditingController(text: widget.parent!.userId ?? '');
       _controllers['login_password'] = TextEditingController(text: widget.parent!.loginPassword ?? '');
@@ -101,9 +99,9 @@ class _AddParentFormState extends ConsumerState<AddParentForm> {
       _controllers['api_key'] = TextEditingController(text: widget.parent!.apiKey ?? '');
       _controllers['api_secret'] = TextEditingController(text: widget.parent!.apiSecret ?? '');
       _controllers['name_tag'] = TextEditingController(text: widget.parent!.nameTag ?? '');
-      _controllers['redirect_url'] = TextEditingController(text: widget.parent!.redirectUrl ?? ''); // Add 'redirect_url'
-      _controllers['pin'] = TextEditingController(text: widget.parent!.pin ?? ''); // Add 'pin'
-      _controllers['mobile'] = TextEditingController(text: widget.parent!.mobile ?? ''); // Add 'mobile'
+      _controllers['redirect_url'] = TextEditingController(text: widget.parent!.redirectUrl ?? '');
+      _controllers['pin'] = TextEditingController(text: widget.parent!.pin ?? '');
+      _controllers['mobile'] = TextEditingController(text: widget.parent!.mobile ?? '');
     }
   }
 
@@ -142,11 +140,7 @@ class _AddParentFormState extends ConsumerState<AddParentForm> {
               onChanged: (newValue) {
                 setState(() {
                   selectedBrokerType = newValue;
-                  _withApi = selectedBrokerType == BrokerType.upstox;
-                  // Fetch form fields for the new broker type
-                  _loadFormFields(newValue!, _withApi); 
-                  // Initialize controllers based on parent data if selectedBrokerType changes from editing
-                  _initializeControllers(); 
+                  _loadFormFields(newValue!);
                 });
               },
               items: BrokerType.values.map((BrokerType value) {
@@ -156,34 +150,22 @@ class _AddParentFormState extends ConsumerState<AddParentForm> {
                 );
               }).toList(),
             ),
-            if (selectedBrokerType == null) ...[
-              const SizedBox(height: 15),
-              const Text('Please select a broker type to load the form fields.'),
+            const SizedBox(height: 15),
+            if (selectedBrokerType == BrokerType.zerodha) ...[
+              const Text('With API'),
+              CheckboxListTile(
+                title: const Text('Use API'),
+                value: false,
+                onChanged: null, // Disable the checkbox
+              ),
             ],
-            if (selectedBrokerType != null) ...[
-              const SizedBox(height: 15),
-              if (selectedBrokerType == BrokerType.zerodha) ...[
-                const Text('With API'),
-                CheckboxListTile(
-                  title: const Text('Use API'),
-                  value: _withApi,
-                  onChanged: (value) {
-                    setState(() {
-                      _withApi = value!;
-                      // Fetch form fields for Zerodha based on "withApi" state
-                      _loadFormFields(BrokerType.zerodha, value); 
-                    });
-                  },
-                ),
-              ],
-              formFieldsAsyncValue!.when(
+            if (formFieldsAsyncValue != null)
+              formFieldsAsyncValue.when(
                 data: (response) {
                   List<UnifiedFormField> fields;
                   if (selectedBrokerType == BrokerType.zerodha) {
                     final zerodhaResponse = response as ZerodhaFormFieldsResponse;
-                    fields = _withApi
-                        ? zerodhaResponse.withApi.fields
-                        : zerodhaResponse.withoutApi.fields;
+                    fields = zerodhaResponse.withoutApi.fields;
                   } else {
                     fields = (response as FormFieldsResponse).fields;
                   }
@@ -196,10 +178,12 @@ class _AddParentFormState extends ConsumerState<AddParentForm> {
                           decoration: InputDecoration(
                             hintText: field.name,
                             border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0)),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
                           ),
-                          validator: (value) =>
-                              field.required && value!.isEmpty ? 'Required' : null,
+                          validator: (value) => field.required && value!.isEmpty
+                              ? 'Required'
+                              : null,
                         ),
                       );
                     }).toList(),
@@ -208,13 +192,12 @@ class _AddParentFormState extends ConsumerState<AddParentForm> {
                 loading: () => const CircularProgressIndicator(),
                 error: (error, stack) => Text('Error: $error'),
               ),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _saveParent,
-                  child: Text(widget.isEditing ? 'Update Parent' : 'Add Parent'),
-                ),
+            Center(
+              child: ElevatedButton(
+                onPressed: _formFieldsLoaded ? _saveParent : null,
+                child: Text(widget.isEditing ? 'Update Parent' : 'Add Parent'),
               ),
-            ],
+            ),
             const SizedBox(height: 15),
           ],
         ),
@@ -226,31 +209,16 @@ class _AddParentFormState extends ConsumerState<AddParentForm> {
     if (_formKey.currentState!.validate()) {
       final parentData = {
         "broker": selectedBrokerType!.name,
-        "with_api": _withApi,
+        "with_api": false, // Always set to false
         ..._controllers.map((key, controller) => MapEntry(key, controller.text)),
       };
 
-      // Debug print to check values
-      _controllers.forEach((key, controller) {
-        print('Key: $key, Value: ${controller.text}');
-      });
-
-      if(widget.isEditing){
-        await ref.read(parentApiServiceProvider).updateParent(parentData);  
-
-      }else{
-
-          await ref.read(parentApiServiceProvider).addParent(parentData);
-
+      if (widget.isEditing) {
+        await ref.read(parentApiServiceProvider).updateParent(parentData);
+      } else {
+        await ref.read(parentApiServiceProvider).addParent(parentData);
       }
       await ref.read(dashboardProvider.notifier).loadParentData();
-          
-
-      print(parentData); // Use this data to save to the database (or API)
-
-      // Add other required fields if necessary
-
-      // Perform save operation...
 
       Navigator.of(context).pop();
     }

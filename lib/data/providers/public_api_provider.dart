@@ -14,6 +14,7 @@ class PublicApiServices {
         await http.get(Uri.parse(url), headers: {'accept': 'application/json'});
 
     if (response.statusCode == 200) {
+      print('zerodha form fields ${response.body}');
       final jsonData = json.decode(response.body);
       if (brokerType == 'zerodha') {
         return ZerodhaFormFieldsResponse.fromJson(jsonData);

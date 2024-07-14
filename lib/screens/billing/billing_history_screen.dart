@@ -1,5 +1,4 @@
 import 'package:bits_trade/screens/dashboard/dashboard_screen.dart';
-import 'package:bits_trade/screens/subscription/subscription_checkout_provider.dart';
 import 'package:bits_trade/utils/shared_prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,11 +23,12 @@ class _SubscriptionHistoryScreenState
   @override
   void initState() {
    
-    // ref.read(subscriptionHistoryProvider);
-    // ref.refresh(subscriptionHistoryProvider);
+    ref.read(subscriptionHistoryProvider);
+    ref.refresh(subscriptionHistoryProvider);
 
 
 print(SharedPrefs.getToken());
+
 
     // ref.watch(subscriptionHistoryProvider);
 
@@ -42,15 +42,10 @@ print(SharedPrefs.getToken());
   ) {
   
     final subscriptionHistory = ref.watch(subscriptionHistoryProvider);
-    ref.watch(paymentStatusProvider);
-    ref.listen(paymentStatusProvider, (previous, next) {
-      if (next == PaymentStatus.error) {
-       ref.refresh(subscriptionHistoryProvider);
-       setState(() {
-         
-       });
-      }
-    });
+
+
+  
+  
 
 
 

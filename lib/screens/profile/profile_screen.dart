@@ -1,3 +1,7 @@
+import 'package:bits_trade/data/modals/subscription_history_modal.dart';
+import 'package:bits_trade/screens/billing/billing_history_screen.dart';
+import 'package:bits_trade/screens/bottombar.dart';
+import 'package:bits_trade/screens/subscription/subscription_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,7 +27,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text('Profile', style: Theme.of(context).textTheme.displayLarge),
         leading: IconButton(
           onPressed: () {
@@ -121,10 +125,10 @@ class SettingsScreen extends ConsumerWidget {
                 
               // ),
               const SizedBox(height: 20),
-              buildSettingItem('Subscriptions', Icons.subscriptions, context),
-              buildSettingItem('Billings', Icons.payment, context),
-              buildSettingItem('General Info', Icons.info, context),
-              buildSettingItem('Customer Support', Icons.support_agent, context),
+              buildSettingItem('Subscriptions', Icons.subscriptions, context,0),
+              buildSettingItem('Billings', Icons.payment, context,1),
+              buildSettingItem('General Info', Icons.info, context,2),
+              buildSettingItem('Customer Support', Icons.support_agent, context,3),
               const Spacer(),
               // Edit Profile Button
             
@@ -133,9 +137,10 @@ class SettingsScreen extends ConsumerWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     await ref.read(loginProvider.notifier).logout();
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       CupertinoPageRoute(builder: (context) => const StartScreen()),
+                      (route) => false,
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -160,7 +165,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget buildSettingItem(String title, IconData icon, BuildContext context) {
+  Widget buildSettingItem(String title, IconData icon, BuildContext context , int index) {
     return Column(
       children: [
         ListTile(
@@ -173,6 +178,39 @@ class SettingsScreen extends ConsumerWidget {
           ),
           trailing: const Icon(Icons.arrow_forward_ios),
           onTap: () {
+
+          if (index==0){
+            // Navigator.push(
+            //   context,
+            //   CupertinoPageRoute(builder: (context) => 
+            // Scaffold(
+            //   appBar: AppBar(
+            //     leading: IconButton(
+            //       onPressed: () {
+            //         Navigator.pop(context);
+            //       },
+            //       icon: const Icon(Icons.arrow_back_ios,color: Colors.white,),
+            //     ),
+            //     title: Text('Subscriptions', style: Theme.of(context).textTheme.displayLarge!.copyWith(
+            //       color: Colors.white
+            //     )),
+            //   ),
+            //   body: Padding(
+            //   padding: const EdgeInsets.all(20.0),
+            //   child: SubscriptionScreen(),
+            // ))
+            //   )
+            // );
+          }
+          if(index==1){
+           Navigator.push(context, CupertinoPageRoute(builder: (context) => BottomBar(index: 2,)));
+
+          }
+
+          if(index==2){
+
+          }
+          if(index==3){}
             // Handle setting item tap
             // You can use the settingsNotifier here if needed
             // settingsNotifier.showSettingDialog(context, title); // Example

@@ -1,63 +1,28 @@
-// lib/screens/subscription/subscription_screen.dart
+// // lib/screens/subscription/subscription_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'subscription_checkout_screen.dart';
-import 'subscription_details_modal.dart';
-import '../../data/providers/subscription_provider.dart';
-import '../../widgets/subscription_card.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'subscription_checkout_screen.dart';
+// import 'subscription_details_modal.dart';
+// import '../../data/providers/subscription_provider.dart';
+// import '../../widgets/subscription_card.dart';
 import 'package:shimmer/shimmer.dart';
 
 
-class SubscriptionScreen extends ConsumerWidget {
-   SubscriptionScreen({super.key});
-  final selectedSubscriptionProvider = StateProvider<Subscription?>(
-  (ref) => null, // Initial value is null
-);
+// class SubscriptionScreen extends ConsumerWidget {
+//    SubscriptionScreen({super.key});
+//   final selectedSubscriptionProvider = StateProvider<Subscription?>(
+//   (ref) => null, // Initial value is null
+// );
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final subscriptionAsyncValue = ref.watch(subscriptionProvider);
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+  
 
-    return 
- subscriptionAsyncValue.when(
-        data: (subscriptions) {
-          return  ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: subscriptions.length,
-            itemBuilder: (context, index) {
-              final subscription = subscriptions[index];
-              return SubscriptionCard(
-                subscriptionType: subscription.plan,
-                subscriptionPrice: subscription.price,
-                childCount: subscription.child,
-                onTap: () {
-                 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>  SubsciptionCheckoutScreen(
-                  subscription.plan,
-                  subscription.price,
-                  subscription.child
-
-                    ),
-                  ),
-                );
-
-                  // Handle the subscription purchase logic here
-                },
-              );
-            },
-          );
-        },
-        loading: () => const ShimmerWidget(),
-        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+//     return 
  
-    );
-  }
-}
-//create shimmer widget
+//   }
+// }
+// //create shimmer widget
 
 class ShimmerWidget extends StatelessWidget {
   const ShimmerWidget({super.key});

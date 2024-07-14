@@ -1,3 +1,5 @@
+import 'package:bits_trade/screens/bottombar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers/subscription_provider.dart';
@@ -8,11 +10,14 @@ class SubsciptionCheckoutScreen extends ConsumerWidget {
   final String subscriptionPlan;
   final int price;
   final int childCount;
+   final VoidCallback? onPaymentSuccess; // Add a callback
+
   const SubsciptionCheckoutScreen(
     this.subscriptionPlan,
     this.price,
     this.childCount, {
     super.key,
+    this.onPaymentSuccess, // Accept the callback
   });
 
   @override
@@ -29,6 +34,18 @@ class SubsciptionCheckoutScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back,color: Colors.white,),
+          onPressed: () {
+      Navigator.pushReplacement(
+
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => BottomBar(),
+                      ),
+                    );
+          },
+        ),
         title: const Text('Checkout'),
       ),
       body: Padding(
@@ -122,39 +139,51 @@ class SubsciptionCheckoutScreen extends ConsumerWidget {
                 child: (() {
                   switch (paymentStatus) {
                     case PaymentStatus.initial:
-                      return ElevatedButton(
-                        onPressed: () async {
-                      
-                          if (formKey.currentState!.validate()) {
-                            paymentNotifier.startPayment(
-                          {
-                            'name': nameController.text,
-                            'email': emailController.text,
-                            'phone': phoneController.text,
-                            'country': 'india',
-                            'subscription':{
-                              'plan': subscriptionPlan,
-                              'price': price,
-                              'type': 'monthly',
-                              'trading':'Copy'
+                      return Container(
+                        height: 60,
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(horizontal: 0),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                        
+                            if (formKey.currentState!.validate()) {
+                              paymentNotifier.startPayment(
+                            {
+                              'name': nameController.text,
+                              'email': emailController.text,
+                              'phone': phoneController.text,
+                              'country': 'india',
+                              'subscription':{
+                                'plan': subscriptionPlan,
+                                'price': price,
+                                'type': 'monthly',
+                                'trading':'Copy'
+                              }
                             }
-                          }
-                            );
-                    
-
-            
-                          
-                              ref.read(subscriptionHistoryProvider);
-                         
-                            ref.refresh(subscriptionHistoryProvider);
-                          }
-               
-                        },
-                        child: Text('Pay Rs.$price'),
+                              );
+                                            
+                        
+                                    
+                            
+                                ref.read(subscriptionHistoryProvider);
+                           
+                              ref.refresh(subscriptionHistoryProvider);
+                        
+                           
+                            }
+                                       
+                          },
+                          child: Text('Pay Rs.$price'),
+                        ),
                       );
                     case PaymentStatus.loading:
                       return const CircularProgressIndicator();
                     case PaymentStatus.success:
+
+                      // Call the callback when payment is successful
+                      //navigate to home page
+                   
+
            
       
                       return const Text('Payment Successful!');

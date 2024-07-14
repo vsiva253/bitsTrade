@@ -32,6 +32,8 @@ final selectedSubscriptionProvider = StateProvider<Subscription?>(
 
 final apiEndpoint = Uri.parse('${Constants.apiBaseUrl}/api/v1/subscription/history');
 
+
+
 // Create a Riverpod provider for fetching subscription history
 final subscriptionHistoryProvider = FutureProvider<SubscriptionHistory?>((ref) async {
   print('fetching subscription history');

@@ -20,14 +20,14 @@ class ProfileUpdateScreen extends StatefulWidget {
 class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
-  late TextEditingController _passwordController;
+  late TextEditingController _emailController;
   late TextEditingController _imageUrlController;
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.userProfile.name);
     _phoneController = TextEditingController(text: widget.userProfile.phone);
-    _passwordController = TextEditingController(text: widget.userProfile.password);
+    _emailController = TextEditingController(text: widget.userProfile.email);
     _imageUrlController = TextEditingController(text: widget.userProfile.avatar);
   }
 
@@ -35,7 +35,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _passwordController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
    //add image picking logic
@@ -54,14 +54,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
    
   @override
   Widget build(BuildContext context) {
-     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent, // top bar color
-      statusBarIconBrightness: Brightness.dark, // top bar icons
-    ));
+     
 
     return Scaffold(
     appBar: AppBar(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       title: Text('Edit Your Profile  ',style: Theme.of(context).textTheme.displayLarge!.copyWith(
         // color: Theme.of(context).primaryColor,
@@ -120,13 +117,13 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 decoration: const InputDecoration(hintText: 'Enter your mobile number'),
               ),
                const SizedBox(height: 20,),
-              const textFieldTitle(title: 'Password'),
+              const textFieldTitle(title: 'Email'),
 
               TextFormField(
-                controller: _passwordController,
+                controller: _emailController,
                 
                 
-             decoration: const InputDecoration(hintText: 'Enter you password',
+             decoration: const InputDecoration(hintText: 'Enter You\'r Email',
              
              ),
               ),
@@ -137,7 +134,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                       final updatedProfile = UserProfile(
                         name: _nameController.text,
                        phone: _phoneController.text,
-                        password: _passwordController.text,
+                        password: _emailController.text,
                         // imageUrl: _imageUrlController.text,
                       );
                       widget.onUpdate(updatedProfile); // Call the update callback

@@ -16,7 +16,7 @@
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
-    <data android:scheme="http" android:host="dev.bitstrade.in" />
+    <data android:scheme="http" android:host="dev.bitstrade.mobile" />
     <data android:scheme="https" />
 </intent-filter>
 <!-- end of deep linking data -->

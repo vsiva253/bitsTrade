@@ -1,10 +1,13 @@
+import 'package:bits_trade/screens/bottombar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/loading_button_widget.dart';
+import '../sign_up/sign_up_screen.dart';
 import 'login_provider.dart'; // Ensure this path is correct
 //import google sign in 
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 
 
 class LoginScreen extends ConsumerWidget {
@@ -18,7 +21,7 @@ class LoginScreen extends ConsumerWidget {
 
     ref.listen<LoginState>(loginProvider, (previous, next) {
       if (next.isLogin && next.token != null && next.token!.isNotEmpty) {
-       context.go('/home');
+    Navigator.pushReplacement(context, CupertinoPageRoute(builder: (context)=>BottomBar()));
       } 
     });
 
@@ -100,7 +103,7 @@ class LoginScreen extends ConsumerWidget {
                   onPressed: loginState.isLoading
                       ? null
                       : () {
-                         context.go('/register');
+                     Navigator.push(context, CupertinoPageRoute(builder: (context) => const RegisterScreen()));
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
@@ -128,31 +131,31 @@ class LoginScreen extends ConsumerWidget {
       ),
     );
   }
-  Future<void> _handleSignIn(BuildContext context) async {
-    final googleSignIn = GoogleSignIn(
-      serverClientId: '948702023927-ggahn8ctcqohh5qcateeo2c5a5j52cjo.apps.googleusercontent.com', // Replace with your Client ID
-    );
+//   Future<void> _handleSignIn(BuildContext context) async {
+//     final googleSignIn = GoogleSignIn(
+//       serverClientId: '948702023927-ggahn8ctcqohh5qcateeo2c5a5j52cjo.apps.googleusercontent.com', // Replace with your Client ID
+//     );
 
-    try {
-      final googleUser = await googleSignIn.signIn();
-      if (googleUser != null) {
-        // Handle the Google Sign In success
-        final googleAuth = await googleUser.authentication;
-        final idToken = googleAuth.idToken;
+//     try {
+//       final googleUser = await googleSignIn.signIn();
+//       if (googleUser != null) {
+//         // Handle the Google Sign In success
+//         final googleAuth = await googleUser.authentication;
+//         final idToken = googleAuth.idToken;
 
-        // Now you have the idToken, you can send it to your backend for user authentication and authorization
-        // ...
-        print('ID Token: $idToken');
+//         // Now you have the idToken, you can send it to your backend for user authentication and authorization
+//         // ...
+//         print('ID Token: $idToken');
 
-        // You can also access user details
-        final user = googleUser;
-        print('User Name: ${user.displayName}');
-        print('User Email: ${user.email}');
-        print('User Photo: ${user.photoUrl}');
-      }
-    } catch (error) {
-      print('Error during Google Sign In: $error');
-      // Handle the error appropriately, show an error message, etc.
-    }
-  }
+//         // You can also access user details
+//         final user = googleUser;
+//         print('User Name: ${user.displayName}');
+//         print('User Email: ${user.email}');
+//         print('User Photo: ${user.photoUrl}');
+//       }
+//     } catch (error) {
+//       print('Error during Google Sign In: $error');
+//       // Handle the error appropriately, show an error message, etc.
+//     }
+//   }
 }

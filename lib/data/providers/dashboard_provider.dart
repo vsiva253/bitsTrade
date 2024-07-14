@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import '../../utils/constants.dart';
 import '../../utils/shared_prefs.dart';
 import '../../widgets/custom_toast.dart';
+import '../modals/get_funds_model.dart';
+import '../modals/parent_positions_model.dart';
 
 // Define a provider for the API service
 final parentApiServiceProvider = Provider<ParentApiService>(
@@ -15,8 +17,71 @@ final parentApiServiceProvider = Provider<ParentApiService>(
 class ParentApiService {
   final http.Client _client;
 
-  ParentApiService({required http.Client client}) : _client = client;
 
+
+  ParentApiService({required http.Client client}) : _client = client;
+  
+
+
+
+
+
+ Future<GetFundsModel?> getFunds(String parentId,) async {
+    final url = Uri.parse('${Constants.apiBaseUrl}/api/v1/parent/get-funds?parentId=$parentId');
+  var token = await SharedPrefs.getToken();
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        return GetFundsModel.fromJson(jsonResponse);
+      } else {
+        print('Error fetching funds: ${response.statusCode}');
+        // Handle errors as needed (e.g., throw an exception)
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching funds: ${e.toString()}');
+      // Handle network or other exceptions
+      return null;
+    }
+  }
+
+   Future<ParentPositionsModel?> getPositions(
+      String parentId, ) async {
+    final url = Uri.parse(
+        '${Constants.apiBaseUrl}/api/v1/parent/get-positions?parentId=$parentId');
+        var token =await SharedPrefs.getToken();
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        return ParentPositionsModel.fromJson(jsonResponse);
+      } else {
+        print('Error fetching positions: ${response.statusCode}');
+        // Handle errors as needed 
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching positions: ${e.toString()}');
+      // Handle exceptions
+      return null;
+    }
+  }
   // Method to add a new parent
   Future<void> addParent(Map<String, dynamic> parent) async {
     var token = await SharedPrefs.getToken();
@@ -34,8 +99,9 @@ class ParentApiService {
         },
         body: json.encode(parent),
       );
-      print(parent);
-      print(token);
+print('parent api send data $parent');
+      print('response $response');
+
 
       // Handle the response
       switch (response.statusCode) {
@@ -65,6 +131,59 @@ class ParentApiService {
       showToast('Something went wrong');
     }
   }
+
+  
+
+   Future<String?> startSocket(String parentId) async {
+    final url = Uri.parse('${Constants.apiBaseUrl}/api/v1/parent/start-socket?parentId=$parentId');
+    
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON.
+        print(response.body);
+        return response.body;
+      } else if (response.statusCode == 422) {
+        // If the server returns a 422 Unprocessable Entity response, parse the error details.
+        final Map<String, dynamic> errorResponse = jsonDecode(response.body);
+        throw Exception('Validation error: ${errorResponse['detail']}');
+      } else {
+        // If the server returns any other response, throw an exception.
+        throw Exception('Failed to start socket. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle any errors that occur during the HTTP request.
+      print('Error: $e');
+      rethrow;
+    }
+  }
+Future<String?> stopSocket(String parentId) async {
+    final url = Uri.parse('${Constants.apiBaseUrl}/api/v1/parent/stop-socket?parentId=$parentId');
+    
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        print(response.body);
+        // If the server returns a 200 OK response, parse the JSON.
+        return response.body;
+      } else if (response.statusCode == 422) {
+        // If the server returns a 422 Unprocessable Entity response, parse the error details.
+        final Map<String, dynamic> errorResponse = jsonDecode(response.body);
+        throw Exception('Validation error: ${errorResponse['detail']}');
+      } else {
+        // If the server returns any other response, throw an exception.
+        throw Exception('Failed to stop socket. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle any errors that occur during the HTTP request.
+      print('Error: $e');
+      rethrow;
+    }
+  }
+
+
 
   // Method to get all parent data
   Future<ParentData?> getParents() async {
@@ -258,6 +377,100 @@ class ChildApiService {
 
   ChildApiService(this._dio);
 
+
+
+  Future<String?> updateChildStatus(
+      String childId, bool status, ) async {
+    var accessToken = await SharedPrefs.getToken();
+    final url = Uri.parse(
+        '${Constants.apiBaseUrl}/api/v1/child/updateStatus?childId=$childId&status=$status');
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Successful response
+        print('Child status updated successfully!');
+        return "Success"; // or return the response body if needed
+      } else {
+        // Handle errors based on the status code
+        print('Error updating child status: ${response.statusCode}');
+        print('Response body: ${response.body}'); 
+        return null; // Or throw an exception 
+      }
+    } catch (e) {
+      // Handle network or other exceptions
+      print('Error updating child status: ${e.toString()}');
+      return null; // Or throw an exception 
+    }
+  }
+
+
+ Future<GetFundsModel?> getFunds(String childId,) async {
+    final url = Uri.parse('${Constants.apiBaseUrl}/api/v1/child/get-funds?childId=$childId');
+  var token = await SharedPrefs.getToken();
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('child funds: ${response.body}');
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        return GetFundsModel.fromJson(jsonResponse);
+      } else {
+        print('Error fetching funds: ${response.statusCode}');
+        // Handle errors as needed (e.g., throw an exception)
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching funds: ${e.toString()}');
+      // Handle network or other exceptions
+      return null;
+    }
+  }
+
+   Future<ParentPositionsModel?> getPositions(
+      String childId,) async {
+    final url = Uri.parse(
+        '${Constants.apiBaseUrl}/api/v1/child/get-positions?childId=$childId');
+        var token =await SharedPrefs.getToken();
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('child Postions: ${response.body}');
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        return ParentPositionsModel.fromJson(jsonResponse);
+      } else {
+        print('Error fetching positions: ${response.statusCode}');
+        // Handle errors as needed 
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching positions: ${e.toString()}');
+      // Handle exceptions
+      return null;
+    }
+  }
+
   Future<void> addChild(Map<String, dynamic> childData) async {
     var token = await SharedPrefs.getToken();
     var headers = {
@@ -266,12 +479,14 @@ class ChildApiService {
       'Authorization': 'Bearer $token'
     };
     try {
-      final response = await _dio.post(
-          '${Constants.apiBaseUrl}/api/v1/child/add',
-          data: childData,
-          options: Options(headers: headers));
+      final response = await http.post(
+         Uri.parse( '${Constants.apiBaseUrl}/api/v1/child/add' ),
+          body:  json.encode(childData),
+         headers: headers,);
       // Handle success response (if needed)
-print('childData bp------ $childData');
+print('childData add child ------ $childData');
+print(response.statusCode);
+print(response.body.toString());
       if (response.statusCode == 200) {
         showToast('Child added successfully');
       } else if (response.statusCode == 422) {
@@ -325,6 +540,8 @@ print('childData bp------ $childData');
         // Unauthorized
         showToast('Unauthorized');
       } else {
+
+        print(response.data);
         // Other errors
         showToast('An error occurred');
       }
@@ -514,8 +731,18 @@ class DashboardState extends StateNotifier<DashboardData> {
     }
 
 
+
   }
-}
+
+  Future<void> updateChildStatus(String childId, bool status) async {
+    try {
+      await childApiService.updateChildStatus(childId, status);
+      // Refresh child data to update the status in the UI
+      await loadChildData();
+    } catch (e) {
+      print('Error updating child status: ${e.toString()}');
+    }
+}}
 
 class DashboardData {
   final ParentData? parentData;
@@ -538,6 +765,8 @@ final dashboardProvider = StateNotifierProvider<DashboardState, DashboardData>(
   (ref) {
     final parentApiService = ref.watch(parentApiServiceProvider);
     final childApiService = ref.watch(childApiServiceProvider);
+     
+ 
     return DashboardState(parentApiService, childApiService);
   },
 );
