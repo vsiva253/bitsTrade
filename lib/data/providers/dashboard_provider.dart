@@ -12,23 +12,20 @@ import '../modals/parent_positions_model.dart';
 
 // Define a provider for the API service
 final parentApiServiceProvider = Provider<ParentApiService>(
-    (ref) => ParentApiService(client: http.Client()));
-
+  (ref) => ParentApiService(client: http.Client(),  ref), // Inject ref
+);
 class ParentApiService {
   final http.Client _client;
+    final ProviderRef<ParentApiService> ref; 
 
+  ParentApiService(this.ref, {required http.Client client}) : _client = client;
 
-
-  ParentApiService({required http.Client client}) : _client = client;
-  
-
-
-
-
-
- Future<GetFundsModel?> getFunds(String parentId,) async {
-    final url = Uri.parse('${Constants.apiBaseUrl}/api/v1/parent/get-funds?parentId=$parentId');
-  var token = await SharedPrefs.getToken();
+  Future<GetFundsModel?> getFunds(
+    String parentId,
+  ) async {
+    final url = Uri.parse(
+        '${Constants.apiBaseUrl}/api/v1/parent/get-funds?parentId=$parentId');
+    var token = await SharedPrefs.getToken();
     try {
       final response = await http.post(
         url,
@@ -41,8 +38,22 @@ class ParentApiService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
         return GetFundsModel.fromJson(jsonResponse);
-      } else {
-        print('Error fetching funds: ${response.statusCode}');
+      } else if(response.statusCode == 400) {
+        var message =await json.decode(response.body)['status']['message'];
+      if (message.contains('Invalid broker token, login again')) {
+
+        await ref.read(dashboardProvider.notifier).loadParentData();
+        showToast('Failed to fetch funds. Please re-login to your broker account');
+
+
+       return null;
+        
+      }
+        // print('Error fetching funds: ${response.body} ,${response.statusCode}');
+        // Handle errors as needed (e.g., throw an exception)
+        return null;
+      }else{
+        print('Error fetching funds: ${response.body} ,${response.statusCode}');
         // Handle errors as needed (e.g., throw an exception)
         return null;
       }
@@ -53,11 +64,12 @@ class ParentApiService {
     }
   }
 
-   Future<ParentPositionsModel?> getPositions(
-      String parentId, ) async {
+  Future<ParentPositionsModel?> getPositions(
+    String parentId,
+  ) async {
     final url = Uri.parse(
         '${Constants.apiBaseUrl}/api/v1/parent/get-positions?parentId=$parentId');
-        var token =await SharedPrefs.getToken();
+    var token = await SharedPrefs.getToken();
 
     try {
       final response = await http.post(
@@ -73,7 +85,7 @@ class ParentApiService {
         return ParentPositionsModel.fromJson(jsonResponse);
       } else {
         print('Error fetching positions: ${response.statusCode}');
-        // Handle errors as needed 
+        // Handle errors as needed
         return null;
       }
     } catch (e) {
@@ -82,6 +94,47 @@ class ParentApiService {
       return null;
     }
   }
+
+  //close all positions
+
+  Future<void> closeAllPositions(String parentId) async {
+    var token = await SharedPrefs.getToken();
+    try {
+      // Define the API endpoint
+      final String endpoint =
+          '${Constants.apiBaseUrl}/api/v1/parent/close-all-positions?parentId=$parentId';
+
+      // Make the DELETE request
+      final response = await _client.delete(
+        Uri.parse(endpoint),
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+      );
+      print(response.body);
+
+      // Handle the response
+      switch (response.statusCode) {
+        
+        case 200:
+          // Successful response
+          showToast('All positions closed successfully');
+          break;
+        case 400:
+          // Unauthorized
+          showToast('Please re-login to your broker account');
+          break;
+        default:
+          // Other errors
+          showToast('An error occurred');
+      }
+    } catch (e) {
+      // Handle any network errors
+      showToast('Something went wrong');
+    }
+  }
+
   // Method to add a new parent
   Future<void> addParent(Map<String, dynamic> parent) async {
     var token = await SharedPrefs.getToken();
@@ -99,9 +152,8 @@ class ParentApiService {
         },
         body: json.encode(parent),
       );
-print('parent api send data $parent');
+      print('parent api send data $parent');
       print('response $response');
-
 
       // Handle the response
       switch (response.statusCode) {
@@ -132,11 +184,10 @@ print('parent api send data $parent');
     }
   }
 
-  
+  Future<String?> startSocket(String parentId) async {
+    final url = Uri.parse(
+        '${Constants.apiBaseUrl}/api/v1/parent/start-socket?parentId=$parentId');
 
-   Future<String?> startSocket(String parentId) async {
-    final url = Uri.parse('${Constants.apiBaseUrl}/api/v1/parent/start-socket?parentId=$parentId');
-    
     try {
       final response = await http.get(url);
 
@@ -150,7 +201,8 @@ print('parent api send data $parent');
         throw Exception('Validation error: ${errorResponse['detail']}');
       } else {
         // If the server returns any other response, throw an exception.
-        throw Exception('Failed to start socket. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to start socket. Status code: ${response.statusCode}');
       }
     } catch (e) {
       // Handle any errors that occur during the HTTP request.
@@ -158,9 +210,11 @@ print('parent api send data $parent');
       rethrow;
     }
   }
-Future<String?> stopSocket(String parentId) async {
-    final url = Uri.parse('${Constants.apiBaseUrl}/api/v1/parent/stop-socket?parentId=$parentId');
-    
+
+  Future<String?> stopSocket(String parentId) async {
+    final url = Uri.parse(
+        '${Constants.apiBaseUrl}/api/v1/parent/stop-socket?parentId=$parentId');
+
     try {
       final response = await http.get(url);
 
@@ -174,7 +228,8 @@ Future<String?> stopSocket(String parentId) async {
         throw Exception('Validation error: ${errorResponse['detail']}');
       } else {
         // If the server returns any other response, throw an exception.
-        throw Exception('Failed to stop socket. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to stop socket. Status code: ${response.statusCode}');
       }
     } catch (e) {
       // Handle any errors that occur during the HTTP request.
@@ -182,8 +237,6 @@ Future<String?> stopSocket(String parentId) async {
       rethrow;
     }
   }
-
-
 
   // Method to get all parent data
   Future<ParentData?> getParents() async {
@@ -195,10 +248,7 @@ Future<String?> stopSocket(String parentId) async {
 
       // Make the GET request
 
-
       final response = await http.get(
-
-
         Uri.parse(endpoint),
         headers: {
           'accept': 'application/json',
@@ -206,13 +256,10 @@ Future<String?> stopSocket(String parentId) async {
         },
       );
 
-print(response.body);
-  
+      print(response.body);
 
       // Handle the response
       switch (response.statusCode) {
-  
-
         case 200:
           // Successful response
           final Map<String, dynamic> jsonData = jsonDecode(response.body);
@@ -240,7 +287,7 @@ print(response.body);
     try {
       // Define the API endpoint
       const String endpoint = '${Constants.apiBaseUrl}/api/v1/parent/update';
-
+      print('update parent $parent');
       // Make the PUT request
       final response = await _client.put(
         Uri.parse(endpoint),
@@ -251,7 +298,7 @@ print(response.body);
         },
         body: json.encode(parent),
       );
-
+      print(response.body);
       // Handle the response
       switch (response.statusCode) {
         case 200:
@@ -282,6 +329,7 @@ print(response.body);
       showToast('Something went wrong');
     }
   }
+
   // Method to delete a parent
   Future<void> deleteParent(String parentId) async {
     var token = await SharedPrefs.getToken();
@@ -319,9 +367,11 @@ print(response.body);
       showToast('Something went wrong');
     }
   }
+
   // Add a method to update parent login status
   Future<void> updateParentLoginStatus(
-      String parentId,) async {
+    String parentId,
+  ) async {
     var token = await SharedPrefs.getToken();
 
     try {
@@ -337,15 +387,12 @@ print(response.body);
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token'
         },
-       
       );
-print(response.body);
+      print(response.body);
       // Handle the response
       switch (response.statusCode) {
         case 200:
-
-
-        print('login status response ${response.body}');
+          print('login status response ${response.body}');
           // Successful response
           // Update the state in the dashboard provider
           showToast('Parent login status updated successfully');
@@ -363,24 +410,23 @@ print(response.body);
       showToast('Something went wrong');
     }
   }
-  
 }
-
 
 // Child Provider
 final childApiServiceProvider = Provider<ChildApiService>((ref) {
-  return ChildApiService(Dio());
+  return ChildApiService(Dio(),ref);
 });
 
 class ChildApiService {
   final Dio _dio;
+    final ProviderRef<ChildApiService> ref; // Add ProviderRef
 
-  ChildApiService(this._dio);
-
-
+  ChildApiService(this._dio, this.ref);
 
   Future<String?> updateChildStatus(
-      String childId, bool status, ) async {
+    String childId,
+    bool status,
+  ) async {
     var accessToken = await SharedPrefs.getToken();
     final url = Uri.parse(
         '${Constants.apiBaseUrl}/api/v1/child/updateStatus?childId=$childId&status=$status');
@@ -401,20 +447,22 @@ class ChildApiService {
       } else {
         // Handle errors based on the status code
         print('Error updating child status: ${response.statusCode}');
-        print('Response body: ${response.body}'); 
-        return null; // Or throw an exception 
+        print('Response body: ${response.body}');
+        return null; // Or throw an exception
       }
     } catch (e) {
       // Handle network or other exceptions
       print('Error updating child status: ${e.toString()}');
-      return null; // Or throw an exception 
+      return null; // Or throw an exception
     }
   }
 
-
- Future<GetFundsModel?> getFunds(String childId,) async {
-    final url = Uri.parse('${Constants.apiBaseUrl}/api/v1/child/get-funds?childId=$childId');
-  var token = await SharedPrefs.getToken();
+  Future<GetFundsModel?> getFunds(
+    String childId,
+  ) async {
+    final url = Uri.parse(
+        '${Constants.apiBaseUrl}/api/v1/child/get-funds?childId=$childId');
+    var token = await SharedPrefs.getToken();
     try {
       final response = await http.post(
         url,
@@ -428,8 +476,22 @@ class ChildApiService {
         print('child funds: ${response.body}');
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
         return GetFundsModel.fromJson(jsonResponse);
-      } else {
-        print('Error fetching funds: ${response.statusCode}');
+      }else if(response.statusCode == 400) {
+        var message =await json.decode(response.body)['status']['message'];
+      if (message.contains('Invalid broker token, login again')) {
+
+        await ref.read(dashboardProvider.notifier).loadChildData();
+        showToast('Failed to fetch funds. Please re-login to your broker account');
+
+
+       return null;
+        
+      }
+        // print('Error fetching funds: ${response.body} ,${response.statusCode}');
+        // Handle errors as needed (e.g., throw an exception)
+        return null;
+      }else{
+        print('Error fetching funds: ${response.body} ,${response.statusCode}');
         // Handle errors as needed (e.g., throw an exception)
         return null;
       }
@@ -440,11 +502,12 @@ class ChildApiService {
     }
   }
 
-   Future<ParentPositionsModel?> getPositions(
-      String childId,) async {
+  Future<ParentPositionsModel?> getPositions(
+    String childId,
+  ) async {
     final url = Uri.parse(
         '${Constants.apiBaseUrl}/api/v1/child/get-positions?childId=$childId');
-        var token =await SharedPrefs.getToken();
+    var token = await SharedPrefs.getToken();
 
     try {
       final response = await http.post(
@@ -461,7 +524,7 @@ class ChildApiService {
         return ParentPositionsModel.fromJson(jsonResponse);
       } else {
         print('Error fetching positions: ${response.statusCode}');
-        // Handle errors as needed 
+        // Handle errors as needed
         return null;
       }
     } catch (e) {
@@ -480,13 +543,14 @@ class ChildApiService {
     };
     try {
       final response = await http.post(
-         Uri.parse( '${Constants.apiBaseUrl}/api/v1/child/add' ),
-          body:  json.encode(childData),
-         headers: headers,);
+        Uri.parse('${Constants.apiBaseUrl}/api/v1/child/add'),
+        body: json.encode(childData),
+        headers: headers,
+      );
       // Handle success response (if needed)
-print('childData add child ------ $childData');
-print(response.statusCode);
-print(response.body.toString());
+      print('childData add child ------ $childData');
+      print(response.statusCode);
+      print(response.body);
       if (response.statusCode == 200) {
         showToast('Child added successfully');
       } else if (response.statusCode == 422) {
@@ -540,7 +604,6 @@ print(response.body.toString());
         // Unauthorized
         showToast('Unauthorized');
       } else {
-
         print(response.data);
         // Other errors
         showToast('An error occurred');
@@ -591,17 +654,16 @@ print(response.body.toString());
       final response = await _dio.get(
           '${Constants.apiBaseUrl}/api/v1/child/getChilds',
           options: Options(headers: headers));
-          print(response);
+      print(response);
       if (response.statusCode == 200) {
         print(response.data['data']);
-     var data = response.data['data'];
+        var data = response.data['data'];
         if (data.isEmpty) {
           return [];
         } else {
-             final List<dynamic> data = response.data['data'];
+          final List<dynamic> data = response.data['data'];
           return data.map((child) => ChildData.fromJson(child)).toList();
         }
-      
       } else if (response.statusCode == 401) {
         // Unauthorized
         showToast('Unauthorized');
@@ -645,9 +707,9 @@ print(response.body.toString());
       print(error);
     }
   }
-  Future<void> updateChildLoginStatus(String childId)async{
 
-      var token = await SharedPrefs.getToken();
+  Future<void> updateChildLoginStatus(String childId) async {
+    var token = await SharedPrefs.getToken();
 
     try {
       // Define the API endpoint
@@ -662,16 +724,13 @@ print(response.body.toString());
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token'
         },
-       
       );
-print(response.body);
-print(childId);
+      print(response.body);
+      print(childId);
       // Handle the response
       switch (response.statusCode) {
         case 200:
-
-
-        print('login status response ${response.body}');
+          print('login status response ${response.body}');
           // Successful response
           // Update the state in the dashboard provider
           showToast('Child login status updated successfully');
@@ -688,8 +747,6 @@ print(childId);
       // Handle any network errors
       showToast('Something went wrong');
     }
-  
-  
   }
 }
 
@@ -711,7 +768,9 @@ class DashboardState extends StateNotifier<DashboardData> {
     state = state.copyWith(childData: childData);
   }
 
-  Future<void> updateParentConnection(String parentId,) async {
+  Future<void> updateParentConnection(
+    String parentId,
+  ) async {
     try {
       await parentApiService.updateParentLoginStatus(parentId);
       // Refresh parent data to update the connection status in the UI
@@ -721,17 +780,13 @@ class DashboardState extends StateNotifier<DashboardData> {
     }
   }
 
-  Future<void> updateChildConnection(String childId)async{
-    try{
+  Future<void> updateChildConnection(String childId) async {
+    try {
       await childApiService.updateChildLoginStatus(childId);
       await loadChildData();
-    }catch (e){
-
-        print('Error updating child connection: ${e.toString()}');
+    } catch (e) {
+      print('Error updating child connection: ${e.toString()}');
     }
-
-
-
   }
 
   Future<void> updateChildStatus(String childId, bool status) async {
@@ -742,7 +797,8 @@ class DashboardState extends StateNotifier<DashboardData> {
     } catch (e) {
       print('Error updating child status: ${e.toString()}');
     }
-}}
+  }
+}
 
 class DashboardData {
   final ParentData? parentData;
@@ -765,9 +821,7 @@ final dashboardProvider = StateNotifierProvider<DashboardState, DashboardData>(
   (ref) {
     final parentApiService = ref.watch(parentApiServiceProvider);
     final childApiService = ref.watch(childApiServiceProvider);
-     
- 
+
     return DashboardState(parentApiService, childApiService);
   },
 );
-

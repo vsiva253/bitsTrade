@@ -1,5 +1,4 @@
 import 'package:bits_trade/screens/bottombar.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -43,7 +42,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
    
 
     return SingleChildScrollView(
-      child:isLoading?Center(child: CircularProgressIndicator(),) :Padding(
+      child:isLoading?const Center(child: CircularProgressIndicator(),) :Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
       
@@ -135,7 +134,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 ),
               ),
             ),
-               !isSubscriptionActive!?      const Text(
+               !isSubscriptionActive?      const Text(
               'Subscribe to the plans to start copy trading',
               style: TextStyle(
                   fontSize: 18,

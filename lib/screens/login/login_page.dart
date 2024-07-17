@@ -2,7 +2,6 @@ import 'package:bits_trade/screens/bottombar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../widgets/loading_button_widget.dart';
 import '../sign_up/sign_up_screen.dart';
 import 'login_provider.dart'; // Ensure this path is correct
@@ -21,12 +20,19 @@ class LoginScreen extends ConsumerWidget {
 
     ref.listen<LoginState>(loginProvider, (previous, next) {
       if (next.isLogin && next.token != null && next.token!.isNotEmpty) {
-    Navigator.pushReplacement(context, CupertinoPageRoute(builder: (context)=>BottomBar()));
+    Navigator.pushReplacement(context, CupertinoPageRoute(builder: (context)=>const BottomBar()));
       } 
     });
 
     return Scaffold(
-      body: SafeArea(
+      appBar: AppBar(
+        leading: const IconButton(
+          icon: Icon(Icons.arrow_back_ios,size: 0,),
+          onPressed:null
+        ),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      ),
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(

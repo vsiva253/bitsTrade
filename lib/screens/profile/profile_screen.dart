@@ -1,5 +1,3 @@
-import 'package:bits_trade/data/modals/subscription_history_modal.dart';
-import 'package:bits_trade/screens/billing/billing_history_screen.dart';
 import 'package:bits_trade/screens/bottombar.dart';
 import 'package:bits_trade/screens/subscription/subscription_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -137,10 +135,9 @@ class SettingsScreen extends ConsumerWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     await ref.read(loginProvider.notifier).logout();
-                    Navigator.pushAndRemoveUntil(
+                    Navigator.pushReplacement(
                       context,
                       CupertinoPageRoute(builder: (context) => const StartScreen()),
-                      (route) => false,
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -180,30 +177,10 @@ class SettingsScreen extends ConsumerWidget {
           onTap: () {
 
           if (index==0){
-            // Navigator.push(
-            //   context,
-            //   CupertinoPageRoute(builder: (context) => 
-            // Scaffold(
-            //   appBar: AppBar(
-            //     leading: IconButton(
-            //       onPressed: () {
-            //         Navigator.pop(context);
-            //       },
-            //       icon: const Icon(Icons.arrow_back_ios,color: Colors.white,),
-            //     ),
-            //     title: Text('Subscriptions', style: Theme.of(context).textTheme.displayLarge!.copyWith(
-            //       color: Colors.white
-            //     )),
-            //   ),
-            //   body: Padding(
-            //   padding: const EdgeInsets.all(20.0),
-            //   child: SubscriptionScreen(),
-            // ))
-            //   )
-            // );
+            Navigator.push(context, CupertinoPageRoute(builder: (context)=>SubscriptionScreen()));
           }
           if(index==1){
-           Navigator.push(context, CupertinoPageRoute(builder: (context) => BottomBar(index: 2,)));
+           Navigator.push(context, CupertinoPageRoute(builder: (context) => const BottomBar(index: 2,)));
 
           }
 

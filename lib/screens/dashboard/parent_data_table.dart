@@ -29,55 +29,97 @@ class ParentDataTable extends ConsumerWidget {
           const SizedBox(
             height: 20,
           ),
-          TextButton(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(0))),
-                backgroundColor: MaterialStateProperty.all(
-                    Theme.of(context).colorScheme.primary),
-                foregroundColor: MaterialStateProperty.all(Colors.white),
-              ),
-              onPressed: () {
-                showModalBottomSheet(
-                  shape: ContinuousRectangleBorder(
-                      borderRadius: BorderRadius.circular(0)),
-                  isScrollControlled: true,
-                  context: context,
-                  builder: (context) {
-                    return Container(
-                      height: MediaQuery.of(context).size.height * 0.95,
-                      padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom),
-                      child: SingleChildScrollView(
-                        child: AddParentForm(
-                          parent: parentData,
-                          isEditing: true,
+          Row(
+        
+            children: [
+              SizedBox(
+                width: 140,
+                child: TextButton(
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(0))),
+                      backgroundColor: MaterialStateProperty.all(
+                          Theme.of(context).colorScheme.primary),
+                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                    ),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        shape: ContinuousRectangleBorder(
+                            borderRadius: BorderRadius.circular(0)),
+                        isScrollControlled: true,
+                        context: context,
+                        builder: (context) {
+                          return Container(
+                            height: MediaQuery.of(context).size.height * 0.95,
+                            padding: EdgeInsets.only(
+                                bottom: MediaQuery.of(context).viewInsets.bottom),
+                            child: SingleChildScrollView(
+                              child: AddParentForm(
+                                parent: parentData,
+                                isEditing: true,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Text(
+                          'Edit Parent',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge!
+                              .copyWith(color: Colors.white),
                         ),
-                      ),
-                    );
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Image.asset(
+                          'assets/edit_icon.png',
+                          height: 20,
+                          fit: BoxFit.cover,
+                          width: 20,
+                        )
+                      ],
+                    )),
+              ),
+
+SizedBox(
+  width: MediaQuery.of(context).size.width -280,
+),
+
+              SizedBox(
+                  width: 140,
+                child: TextButton(
+                
+                  onPressed: ()async{
+
+                    await ref.read(parentApiServiceProvider).closeAllPositions(parentData.id!);
+                 
                   },
-                );
-              },
-              child: Row(
-                children: [
-                  Text(
-                    'Edit Parent',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge!
-                        .copyWith(color: Colors.white),
+                
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0))),
+                    backgroundColor: MaterialStateProperty.all(
+                        Colors.red),
+                    foregroundColor: MaterialStateProperty.all(Colors.white),
                   ),
-                  const SizedBox(
-                    width: 5,
+                  child: Row(
+                    children: [
+                      Icon(Icons.close),
+                      Text('Close All',style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600
+                      ),),
+                    ],
                   ),
-                  Image.asset(
-                    'assets/edit_icon.png',
-                    height: 20,
-                    fit: BoxFit.cover,
-                    width: 20,
-                  )
-                ],
-              )),
+                ),
+              ),
+              
+            ],
+          ),
           SizedBox(
             width: MediaQuery.of(context).size.width,
             child: DataTable(
@@ -180,7 +222,7 @@ class ParentDataTable extends ConsumerWidget {
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return Center(
+        return const Center(
           child: CircularProgressIndicator(),
         );
       },

@@ -34,6 +34,7 @@ class _AddParentFormState extends ConsumerState<AddParentForm> {
           ? BrokerType.upstox
           : BrokerType.zerodha;
       _initializeControllers();
+       _loadFormFields(selectedBrokerType!);
     } else {
       // Initially, fetch form fields for Zerodha
       _loadFormFields(BrokerType.zerodha);
@@ -153,8 +154,8 @@ class _AddParentFormState extends ConsumerState<AddParentForm> {
             const SizedBox(height: 15),
             if (selectedBrokerType == BrokerType.zerodha) ...[
               const Text('With API'),
-              CheckboxListTile(
-                title: const Text('Use API'),
+              const CheckboxListTile(
+                title: Text('Use API'),
                 value: false,
                 onChanged: null, // Disable the checkbox
               ),
@@ -181,15 +182,23 @@ class _AddParentFormState extends ConsumerState<AddParentForm> {
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                           ),
-                          validator: (value) => field.required && value!.isEmpty
-                              ? 'Required'
-                              : null,
+                          validator: (value) {
+                            if (field.required && (value == null || value.isEmpty)) {
+                              return 'Required';
+                            }
+                            if (field.pattern != null && !RegExp(field.pattern!).hasMatch(value!)) {
+                              return 'Invalid format';
+                            }
+                            return null;
+                          }
                         ),
                       );
                     }).toList(),
                   );
                 },
-                loading: () => const CircularProgressIndicator(),
+                loading: () => Container(
+                  margin:const EdgeInsets.symmetric(vertical: 70),
+                  child:const Center(child:  CircularProgressIndicator())),
                 error: (error, stack) => Text('Error: $error'),
               ),
             Center(

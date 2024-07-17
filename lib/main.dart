@@ -9,7 +9,6 @@ import 'package:bits_trade/screens/sign_up/sign_up_screen.dart';
 import 'package:bits_trade/theme.dart';
 import 'package:bits_trade/utils/shared_prefs.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
@@ -146,6 +145,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // appBar: AppBar(
+      // // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      // leading: Icon(Icons.abc,size: 0,),
+      // ),
       backgroundColor: Colors.white,
       body: Center(
         child: SvgPicture.asset('assets/splash.svg'),

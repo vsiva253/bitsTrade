@@ -132,7 +132,7 @@ class ChildDataTable extends ConsumerWidget {
                 splashRadius: BorderSide.strokeAlignCenter,
               ),
             ),
-            Spacer()
+            const Spacer()
           ],
         ),
         onTap: () {
@@ -165,7 +165,7 @@ class ChildDataTable extends ConsumerWidget {
                           .read(dashboardProvider.notifier)
                           .updateChildStatus(child.id!, true);
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.play_arrow_outlined,
                       color: Colors.teal,
                     ))
@@ -175,7 +175,7 @@ class ChildDataTable extends ConsumerWidget {
                           .read(dashboardProvider.notifier)
                           .updateChildStatus(child.id!, false);
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.pause_outlined,
                       color: Colors.teal,
                     )),
@@ -200,7 +200,7 @@ class ChildDataTable extends ConsumerWidget {
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return Center(
+        return const Center(
           child: CircularProgressIndicator(),
         );
       },

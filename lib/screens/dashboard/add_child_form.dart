@@ -135,7 +135,7 @@ class _AddChildFormState extends ConsumerState<AddChildForm> {
               const textFieldTitle(title: 'Broker Type'),
               DropdownButtonFormField<BrokerType>(
                 value: selectedBrokerType,
-                hint: Text('Select Broker Type'),
+                hint: const Text('Select Broker Type'),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -190,14 +190,24 @@ class _AddChildFormState extends ConsumerState<AddChildForm> {
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
                             ),
-                            validator: (value) =>
-                                field.required && value!.isEmpty ? 'Required' : null,
+                            validator: (value) {
+                               if (field.required && (value == null || value.isEmpty)) {
+                              return 'Required';
+                            }
+                            if (field.pattern != null && !RegExp(field.pattern!).hasMatch(value!)) {
+                              return 'Invalid format';
+                            }
+                            return null;
+                            }
+                                
                           ),
                         );
                       }).toList(),
                     );
                   },
-                  loading: () => const CircularProgressIndicator(),
+                  loading: () => Container(
+                  margin:const EdgeInsets.symmetric(vertical: 70),
+                  child:const Center(child:  CircularProgressIndicator())),
                   error: (error, stack) => Text('Error: $error'),
                 ),
               Center(

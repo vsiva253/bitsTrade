@@ -10,7 +10,8 @@ class PublicApiServices {
   static Future<dynamic> getFormFields(
       String brokerType, String formType) async {
     final url = '${Constants.apiBaseUrl}/api/v1/public/$brokerType/$formType';
-    final response =
+   try{
+     final response =
         await http.get(Uri.parse(url), headers: {'accept': 'application/json'});
 
     if (response.statusCode == 200) {
@@ -26,6 +27,10 @@ class PublicApiServices {
     } else {
       throw Exception('Failed to load form fields');
     }
+   }catch(e){
+      print('Error in getFormFields: $e');
+    
+   }
   }
 }
 

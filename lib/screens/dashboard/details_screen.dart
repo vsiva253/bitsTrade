@@ -4,7 +4,6 @@ import 'package:bits_trade/data/modals/parent_data_modal.dart';
 import 'package:bits_trade/data/modals/parent_positions_model.dart';
 import 'package:bits_trade/data/providers/dashboard_provider.dart';
 import 'package:bits_trade/widgets/custom_toast.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -145,14 +144,54 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.childData != null
-                    ? '${widget.childData?.nameTag??''}'
-                    : '${widget.parentData?.nameTag??''}',
-                style: Theme.of(context)
-                    .textTheme
-                    .displayLarge!
-                    .copyWith(color: Theme.of(context).primaryColor),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.childData != null
+                        ? widget.childData?.nameTag??''
+                        : widget.parentData?.nameTag??'',
+                    style: Theme.of(context)
+                        .textTheme
+                        .displayLarge!
+                        .copyWith(color: Theme.of(context).primaryColor),
+                  ),
+
+                         InkWell(
+                  onTap: ()async {
+
+                   await refreshData();
+                  await  refreshFunds();
+                    // showToast('Data refreshed successfully');
+
+                  },
+
+                  child: Container(
+                    height: 40,
+                  
+                 decoration: BoxDecoration(
+                     color: Colors.blue,
+                     borderRadius: BorderRadius.circular(4)
+                 ),
+                    padding: const EdgeInsets.all(10),
+                    child: const Row(
+                      
+                      children: [
+                        Icon(
+                          Icons.refresh_rounded,color: Colors.white,size: 20,
+                        ),
+                        SizedBox(width: 5,),
+                         Text('refresh',style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600
+                        ),),
+                      ],
+                    ),
+                  ),
+                )
+                
+             
+                ],
               ),
               const SizedBox(
                 height: 20,
@@ -175,7 +214,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                           textWidget(context, 'Total Balance',
                               '${widget.fundsData?.data?.totalBalance?? '-'}'),
                           textWidget(context, 'Realized P&L',
-                              '${widget.fundsData?.data?.realizedPl?? '-'}'),
+                              widget.fundsData?.data?.realizedPl?? '-'),
                         ],
                       ),
                     ),
@@ -268,34 +307,39 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                       ],
                     ),
                   ),
-                   InkWell(
-                  onTap: ()async {
+            
 
-                    refreshData();
+                if(widget.childData==null)       SizedBox(
+                  // width: 140,
+                child: TextButton(
+                
+                  onPressed: ()async{
+
+                  ref.read(parentApiServiceProvider).closeAllPositions(widget.parentData!.id!).then((value) {
+                Navigator.pop(context);
+              });
+                 
                   },
-
-                  child: Container(
-                  
-                 decoration: BoxDecoration(
-                     color: Colors.blue,
-                     borderRadius: BorderRadius.circular(4)
-                 ),
-                    padding: const EdgeInsets.all(10),
-                    child: const Row(
-                      
-                      children: [
-                        Icon(
-                          Icons.refresh_rounded,color: Colors.white,
-                        ),
-                        SizedBox(width: 5,),
-                         Text('refresh',style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600
-                        ),),
-                      ],
-                    ),
+                
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0))),
+                    backgroundColor: MaterialStateProperty.all(
+                        Colors.red),
+                    foregroundColor: MaterialStateProperty.all(Colors.white),
                   ),
-                )
+                  child:const Row(
+                    children: [
+                      Icon(Icons.close),
+                      Text('Close All',style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600
+                      ),),
+                    ],
+                  ),
+                ),
+              ),
+              
                 ],
               ),
               const SizedBox(
@@ -339,7 +383,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                   ),
                 ),
               ):Container(),
-              Container(
+              SizedBox(
                 height: MediaQuery.of(context).size.height * 0.40,
                 child: widget.positionData != null &&
                         widget.positionData!.data != null &&
@@ -373,7 +417,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                           width: 0.5,
                         ),
                       ),
-                      child: Center(child: Text('No positions available'))), // Display a message if positions are empty or null
+                      child: const Center(child: Text('No positions available'))), // Display a message if positions are empty or null
               ),
               const SizedBox(height: 20),
             ],

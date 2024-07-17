@@ -41,159 +41,171 @@ class SubsciptionCheckoutScreen extends ConsumerWidget {
 
                       context,
                       CupertinoPageRoute(
-                        builder: (context) => BottomBar(),
+                        builder: (context) => const BottomBar(),
                       ),
                     );
           },
         ),
         title: const Text('Checkout'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'You Have Been Selected $subscriptionPlan Plan',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              // SizedBox(height: 10,),
+      body: WillPopScope(
+        onWillPop: () async {
+          Navigator.pushReplacement(
 
-              SubscriptionCard(
-                subscriptionType: subscriptionPlan,
-                subscriptionPrice: price,
-                childCount: childCount,
-                onTap: () {
-                  // Handle subscription purchase logic here
-                },
-              ),
-
-              const SizedBox(height: 20),
-              Text(
-                'Confirm the details to purchase!',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  hintText: 'Please Enter Your Name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => const BottomBar(),
+                      ),
+                    );
+          return true;
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'You Have Been Selected $subscriptionPlan Plan',
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
-                
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  hintText: 'Please Enter Your Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+                // SizedBox(height: 10,),
+        
+                SubscriptionCard(
+                  subscriptionType: subscriptionPlan,
+                  subscriptionPrice: price,
+                  childCount: childCount,
+                  onTap: () {
+                    // Handle subscription purchase logic here
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  if (!value.contains('@')) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                },
-               
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: phoneController,
-                decoration: InputDecoration(
-                  hintText: 'Please Enter Your Phone Number',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+        
+                const SizedBox(height: 20),
+                Text(
+                  'Confirm the details to purchase!',
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your phone number';
-                  }
-                  if (value.length != 10) {
-                    return 'Please enter a valid 10-digit phone number';
-                  }
-                  return null;
-                },
-               
-              ),
-              const SizedBox(height: 50),
-              Center(
-                child: (() {
-                  switch (paymentStatus) {
-                    case PaymentStatus.initial:
-                      return Container(
-                        height: 60,
-                        width: double.infinity,
-                        margin: EdgeInsets.symmetric(horizontal: 0),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                        
-                            if (formKey.currentState!.validate()) {
-                              paymentNotifier.startPayment(
-                            {
-                              'name': nameController.text,
-                              'email': emailController.text,
-                              'phone': phoneController.text,
-                              'country': 'india',
-                              'subscription':{
-                                'plan': subscriptionPlan,
-                                'price': price,
-                                'type': 'monthly',
-                                'trading':'Copy'
+        
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    hintText: 'Please Enter Your Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your name';
+                    }
+                    return null;
+                  },
+                  
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    hintText: 'Please Enter Your Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
+                 
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: phoneController,
+                  decoration: InputDecoration(
+                    hintText: 'Please Enter Your Phone Number',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your phone number';
+                    }
+                    if (value.length != 10) {
+                      return 'Please enter a valid 10-digit phone number';
+                    }
+                    return null;
+                  },
+                 
+                ),
+                const SizedBox(height: 50),
+                Center(
+                  child: (() {
+                    switch (paymentStatus) {
+                      case PaymentStatus.initial:
+                        return Container(
+                          height: 60,
+                          width: double.infinity,
+                          margin: const EdgeInsets.symmetric(horizontal: 0),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                          
+                              if (formKey.currentState!.validate()) {
+                                paymentNotifier.startPayment(
+                              {
+                                'name': nameController.text,
+                                'email': emailController.text,
+                                'phone': phoneController.text,
+                                'country': 'india',
+                                'subscription':{
+                                  'plan': subscriptionPlan,
+                                  'price': price,
+                                  'type': 'monthly',
+                                  'trading':'Copy'
+                                }
                               }
-                            }
-                              );
-                                            
-                        
-                                    
-                            
-                                ref.read(subscriptionHistoryProvider);
-                           
-                              ref.refresh(subscriptionHistoryProvider);
-                        
-                           
-                            }
-                                       
-                          },
-                          child: Text('Pay Rs.$price'),
-                        ),
-                      );
-                    case PaymentStatus.loading:
-                      return const CircularProgressIndicator();
-                    case PaymentStatus.success:
-
-                      // Call the callback when payment is successful
-                      //navigate to home page
-                   
-
-           
-      
-                      return const Text('Payment Successful!');
-                    default:
-                
-                      return const Text('Payment Failed!');
-                  }
-                })(),
-              ),
-            ],
+                                );
+                                              
+                          
+                                      
+                              
+                                  ref.read(subscriptionHistoryProvider);
+                             
+                                ref.refresh(subscriptionHistoryProvider);
+                          
+                             
+                              }
+                                         
+                            },
+                            child: Text('Pay Rs.$price'),
+                          ),
+                        );
+                      case PaymentStatus.loading:
+                        return const CircularProgressIndicator();
+                      case PaymentStatus.success:
+        
+                        // Call the callback when payment is successful
+                        //navigate to home page
+                     
+        
+             
+        
+                        return const Text('Payment Successful!');
+                      default:
+                  
+                        return const Text('Payment Failed!');
+                    }
+                  })(),
+                ),
+              ],
+            ),
           ),
         ),
       ),

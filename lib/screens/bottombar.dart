@@ -2,12 +2,11 @@ import 'dart:convert';
 import 'package:bits_trade/screens/billing/billing_history_screen.dart';
 import 'package:bits_trade/screens/dashboard/dashboard_screen.dart';
 import 'package:bits_trade/screens/home/home_page.dart';
-import 'package:bits_trade/screens/profile/profile_modal.dart';
 import 'package:bits_trade/screens/profile/profile_provider.dart';
 import 'package:bits_trade/screens/profile/profile_screen.dart';
+import 'package:bits_trade/utils/error500_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../data/providers/subscription_provider.dart';
@@ -70,14 +69,23 @@ class _BottomBarState extends ConsumerState<BottomBar> {
         } else {
           print('No active subscription found');
         }
-      } else {
+      }else if(response.statusCode==500){
+
+        setState(() {
+           Navigator.pushReplacement(context, CupertinoPageRoute(builder: (context) =>  Error500Screen()));
+        });
+        showToast('Failed to fetch subscription data');
+      }
+      
+       else {
         setState(() {
           _selectedIndex = 0;
           _isLoading = false;
           ref.read(subscriptionStatusProvider.notifier).state = false;
+       
         });
         print('No subscription data found');
-        showToast('No subscription data found');
+        // showToast('No subscription data found');
       }
     } else {
       showToast('Failed to load subscription history');
@@ -105,59 +113,71 @@ class _BottomBarState extends ConsumerState<BottomBar> {
       setState(() {});
     }
 
-    return Scaffold(
-      appBar: appbarWidget(context, userProfile.name ?? '.............',
-          userProfile.avatar ?? 'https://via.placeholder.com/150'),
-      body: _isLoading
-          ? Column(
-              children: [
-                ...List.generate(2, (index) => const ParentDataShimmer()),
-                ...List.generate(4, (_) => const ChildDataShimmer())
-              ],
-            )
-          : IndexedStack(
-              index: _selectedIndex ?? 0,
-              children: [
-                Consumer(builder: (context, watch, child) {
-                  return const MyHomePage();
-                }),
-                Consumer(builder: (context, watch, child) {
-                  return const DashboardScreen();
-                }),
-                Consumer(builder: (context, watch, child) {
-                  return const SubscriptionHistoryScreen();
-                }),
-              ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_selectedIndex != 0) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        appBar: appbarWidget(context, userProfile.name ?? '.............',
+            userProfile.avatar ?? 'https://via.placeholder.com/150'),
+        body: _isLoading
+            ? Column(
+                children: [
+                  SizedBox(height: 20,),
+                  ...List.generate(2, (index) => const ParentDataShimmer()),
+                  ...List.generate(4, (_) => const ChildDataShimmer())
+                ],
+              )
+            : IndexedStack(
+                index: _selectedIndex ?? 0,
+                children: [
+                  Consumer(builder: (context, watch, child) {
+                    return const MyHomePage();
+                  }),
+                  Consumer(builder: (context, watch, child) {
+                    return const DashboardScreen();
+                  }),
+                  Consumer(builder: (context, watch, child) {
+                    return const SubscriptionHistoryScreen();
+                  }),
+                ],
+              ),
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Image.asset(
+                'assets/bottom_bar/home.png',
+                color: Theme.of(context).iconTheme.color,
+              ),
+              activeIcon: Image.asset(
+                'assets/bottom_bar/home.png',
+              ),
+              label: '',
             ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/bottom_bar/home.png',
-              color: Theme.of(context).iconTheme.color,
+            BottomNavigationBarItem(
+              icon: Image.asset('assets/bottom_bar/transactions.png',
+                  color: Theme.of(context).iconTheme.color),
+              activeIcon: Image.asset('assets/bottom_bar/transactions.png'),
+              label: '',
             ),
-            activeIcon: Image.asset(
-              'assets/bottom_bar/home.png',
+            BottomNavigationBarItem(
+              icon: Image.asset('assets/bottom_bar/history.png',
+                  color: Theme.of(context).iconTheme.color),
+              activeIcon: Image.asset('assets/bottom_bar/history.png'),
+              label: '',
             ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/bottom_bar/transactions.png',
-                color: Theme.of(context).iconTheme.color),
-            activeIcon: Image.asset('assets/bottom_bar/transactions.png'),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/bottom_bar/history.png',
-                color: Theme.of(context).iconTheme.color),
-            activeIcon: Image.asset('assets/bottom_bar/history.png'),
-            label: '',
-          ),
-        ],
-        currentIndex: _selectedIndex ?? 0,
-        selectedItemColor: const Color(0xFF00B386),
-        onTap: _onItemTapped,
+          ],
+          currentIndex: _selectedIndex ?? 0,
+          selectedItemColor: const Color(0xFF00B386),
+          onTap: _onItemTapped,
+        ),
       ),
     );
   }

@@ -4,6 +4,7 @@ class UnifiedFormField {
   final String type;
   final bool required;
   final String? initialValue;
+  final String? pattern;
 
   UnifiedFormField({
     required this.id,
@@ -11,6 +12,7 @@ class UnifiedFormField {
     required this.type,
     required this.required,
     this.initialValue,
+    this.pattern,
   });
 
   factory UnifiedFormField.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class UnifiedFormField {
       type: json['type'] as String,
       required: json['required'] as bool,
       initialValue: json['initial_value'] as String?,
+      pattern: json['pattern'] as String?,
     );
   }
 }

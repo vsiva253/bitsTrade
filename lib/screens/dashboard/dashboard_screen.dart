@@ -3,8 +3,8 @@ import 'package:bits_trade/screens/dashboard/child_data_table.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../data/providers/dashboard_provider.dart';
 import 'add_parent_form.dart';
@@ -68,7 +68,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         width: MediaQuery.of(context).size.width*0.7,
                         height:MediaQuery.of(context).size.width*0.7,
                       ),
-                         SizedBox(height: 20,),
+                         const SizedBox(height: 20,),
                       Text('Please Subscribe to Start Copy Trading',
                           style: Theme.of(context).textTheme.displayMedium!.copyWith(
                               )
@@ -77,10 +77,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       Container(
                         width: 200,
                         height: 50,
-                        margin: EdgeInsets.all(15),
+                        margin: const EdgeInsets.all(15),
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.push(context, CupertinoPageRoute(builder: (context) => BottomBar()));
+                            Navigator.push(context, CupertinoPageRoute(builder: (context) => const BottomBar()));
                           },
                           child:const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -140,7 +140,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 child: Column(
                   children: [
                     Container(
-                      margin: EdgeInsets.only(bottom: 10),
+                      margin: const EdgeInsets.only(bottom: 10),
                       width: 200,
                       height: 50,
                       child: ElevatedButton(
@@ -162,13 +162,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ),
 
-SizedBox(
+const SizedBox(
   height: 35,
 ),
-          Image.asset(
-            'assets/parent.png',
-    
-          ),
+          SvgPicture.asset('assets/parent.svg')
         ],
       ),
     );
@@ -188,7 +185,7 @@ SizedBox(
                 child: Column(
                   children: [
                     Container(
-                      margin: EdgeInsets.only(bottom: 10),
+                      margin: const EdgeInsets.only(bottom: 10),
                       width: 200,
                       height: 50,
                       child: ElevatedButton(
